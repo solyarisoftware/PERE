@@ -82,6 +82,7 @@ above all:
 
 ```bash
 $ bundle install
+$ export HOSTNAME= ...
 ```
 
 
