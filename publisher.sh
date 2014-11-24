@@ -1,0 +1,1 @@
+curl -X POST http://192.168.1.102:4567/publish/CHANNEL_1 -d '{"message": "kajjjhdjkdshj"}'

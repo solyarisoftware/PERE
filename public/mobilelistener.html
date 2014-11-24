@@ -1,0 +1,35 @@
+<html>
+<head> 
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+</head> 
+<body>
+  <div id="event"></div>	
+  
+  <script type='text/javascript'>
+  // generate a random device ID (as a mobile phone number)
+  function rc(min, max) { 
+    return Math.floor(Math.random() * (max - min)) + min; 
+  }
+  
+  var device = 'M' + '0039' + rc(1,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9)  
+
+  // http://www.html5rocks.com/en/tutorials/eventsource/basics/
+  var es = new EventSource('/feed/CHANNEL_1');
+
+  es.onmessage = function(e) { 
+
+  	//if (e.origin != 'http://example.com') {
+    //  alert('Origin was not http://example.com');
+    //return;
+
+  	$('#event').append(e.data + "\n"); 
+  	
+  	console.log(e.data); 
+
+    // feedback to server
+    $.post( "/feedback/CHANNEL_1", { id: e.lastEventId, device: device, status: "ok" } );
+  };
+  </script>
+</body>
+</html>
