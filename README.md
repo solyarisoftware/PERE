@@ -1,6 +1,6 @@
 PERE
 ====
-***P**ushed **E**vents with return **R**eceipt **E**ngine*: a Ruby-Sinatra SSE Pub/Sub framework.
+* **P**ushed **E**vents with return **R**eceipt **E**ngine*: a Ruby-Sinatra SSE Pub/Sub framework.
 
 <img src="https://github.com/solyaris/PERE/blob/master/public/pere-logo.png" alt="PERE logo">
 
@@ -164,7 +164,7 @@ SOFTWARE.Real-Time Web Technologies Guide
 - [Paolo Montrasio](https://github.com/pmontrasio), about the sentence "hey Giorgio, why don't you use SSE?".
 - [Phil Leggetter](https://github.com/leggetter), for his [Real-Time Web Technologies Guide](http://www.leggetter.co.uk/real-time-web-technologies-guide)
 - [Swanand Pagnis](https://github.com/swanandp), for his [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul)
-- [Salvatore Sanfilippo](https://github.com/antirez) I do not (yet) used http://redis.io/[REDIS](http://redis.io/) here, but there is always a good reason to thank-you him.
+- [Salvatore Sanfilippo](https://github.com/antirez) I do not (yet) used [REDIS](http://redis.io/) here, but there is always a good reason to thank-you him.
 
 
 # Contacts
