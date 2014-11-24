@@ -1,124 +1,120 @@
 PERE
 ====
-Pushed Events with return Receipt Engine: a Ruby-Sinatra SSE Pub/Sub framework
-
+***P**ushed **E**vents with return **R**eceipt **E**ngine*: a Ruby-Sinatra SSE Pub/Sub framework.
 
 <img src="https://github.com/solyaris/PERE/blob/master/public/pere-logo.png" alt="PERE logo">
 
-
-Simple a proof of concept code, to show how to push events using flat HTTP SSE to downstream events to clients devices with delivery receipts (using HTTP webhooks).
+Here a simple *proof of concept* code, to show how to push events using flat HTTP SSE (down-stream) to clients devices with "delivery receipts" (up-stream feedbacks).
 
 
 ## Push notifications with return-receipt (problem)
 
-- For some business application purposes, I need to delivery "events/messages" server-side published, to a multitude of devices.
+For some business application purposes (rosposhop.com, pagosaldo.com), I need to delivery "events/messages" server-side published, to a multitude of devices, with garantee delivery.
 
-
-- Devices: are possibly anything: hosts clients, web browsers, mobile handset (via website or native app).
+- Devices: are possibly "anything": 
+  - hosts clients
+  - web browsers on PCs
+  - mobile handset (via website or native app)
 
 - Pub/sub: old fashioned publisher/subscriber is fine for the goal.
 
 
-- Up-stream: The server must have some "delivery receipt" aka "return receipt" from each device that receive the events on a channel, with a status update of local elaborations.
+- Up-stream feedbacks: 
+The server must have some *delivery receipt* aka *return receipt* from each client device that receive the events on a channel, with a *status update* of local elaborations.
 
 - JSON for data transport is fine.
 
-- Just HTTP ? 
+- Just HTTP, please! 
 
 
 ## A Ruby-Sinatra SSE Pub/Sub framework (solution)
 
-The basic idea is to implement pub/sub using Server-Sent Events aka SSE [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just HTTP streaming.
+The basic idea is to implement pub/sub using *Server-Sent Events* aka EventSource aka [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just **HTTP streaming**.
 
 
 ```
                  .-------.
-publish evt ->   | PERE  |---> channel 1 down-stream feed -> device 1
-                 |       |<--------------------------------- feedback up-stream
+publish evt ->   | PERE  |--- HTTP SSE events (down-stream) --> channel 1 -> device 1 
+                 |       |<-- HTTP POST (up-stream) status  <---------------
+                 |       | 
+                 |       |--- HTTP SSE events (down-stream) --> channel 1 -> device 2
+                 |       |<-- HTTP POST (up-stream) status  <--------------- 
                  |       |                
-                 |       |---> channel 1 down-stream feed -> ...
-                 |       |<---------------------------------
-                 |       |                
-                 |       |---> channel 1 down-stream feed -> device m
-                 |       |<--------------------------------- feedback up-stream
+                 |       |--- HTTP SSE events (down-stream) --> channel 1 -> device N
+                 |       |<-- HTTP POST (up-stream) status  <---------------
                  |       | 
-                 |       | 
-                 |       |---------------------------------> channel 2 -> ...
-                 |       |
-                 |       | 
-                 |       |                                              .-> device d+1
-                 |       |---------------------------------> channel N -.-> ... 
-                 .-------.                                              .-> device d+D
+                 |       |--- HTTP SSE events (down-stream) --> channel N ->
+                 .-------.                                              
 
 ```
 
 
-Usual tools: Ruby language, beloved [Sinatra](http://www.sinatrarb.com/) microframework, [Thin](https://github.com/macournoyer/thin/) fast web server with [EventMachine](https://github.com/eventmachine/eventmachine) event-driven I/O.
+Usual tools: 
+- Ruby language 
+- beloved [Sinatra](http://www.sinatrarb.com/) microframework 
+- fast web server [Thin](https://github.com/macournoyer/thin/) with [EventMachine](https://github.com/eventmachine/eventmachine) event-driven I/O under thw woods.
 
 
-### Endpoints
+### Main Endpoints
 
-PUSH AN EVENT TO A CHANNEL (PUBLISH)
-
+- PUSH AN EVENT TO A CHANNEL (PUBLISH)
 ```bash
 post "/push/:channel" do
 ```
 
-LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
-
+- LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
 ```bash
 get "/feed/:channel", provides: 'text/event-stream' do
 ```
 
-FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
-
+- FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
 ```bash
 post "/feedback/:channel" do
 ```
 
-## run stuff
+## run test stuff
 
 above all:
 
 ```bash
 $ bundle install
-$ export HOSTNAME= ...
+$ export HOSTNAME= yourhostname
 ```
 
 
-### On the first terminal: run the server engine
+### run the SSEserver engine
 
-The server is a Sinatra app doing the server-side job: 
+On the first terminal run the server, a Sinatra app doing the server-side job: 
 
 ```bash
 $ ruby sseserver.rb -o yourhostname
 ```
 
 
-### On a second terminal: run a "publisher" 
+### run a event *publisher*
 
-The test publisher that emit / push some event every few seconds on a certain channel.
+ On a second terminal, the test publisher that emit / push some event every few seconds on a certain channel. An event here is a JSON containing chunk of random data as payload:
 
 ```bash
 $ ruby publisher.rb
 ```
 
 
-### On (one or many devices): run a "host listener"
+### run a *host listener*
 
-run a test client host that listen events on a certain channel, does some elaboration and feedback some status ack to server. 
+On one or many terminal (devices), run a test client host that listen events on a certain channel, does some elaboration and feedback some status ack to server:
 
 ```bash
 $ ruby hostlistener.rb
 ```
 
 
-### On (one or many) browser windows run a "web listener"  
+### run a *web listener*  
 
-A web page that listen events on a certain channel, does some elaboration and feedback some status ack to server. 
+On (one or many) browser windows, open a web page that listen events events on a certain channel (using standard SSE HTML Javascript code), does some elaboration and feedback some status ack to server:
 
 ```bash
-$ curl http://yourhostname/weblistener.html
+http://yourhostname/weblistener.html
 ```
 
 
@@ -127,9 +123,9 @@ $ curl http://yourhostname/weblistener.html
 
 ## To Do
 
-- Manage SSE IDs.
+- Manage SSE IDs! (client re-synch to last SSE ID).
 - Add a queue system to store events pushed on a channel (I guess to use REDIS)
-- better weblistener.html
+- less raugh weblistener.html
 - think about some UUID to identify devices (serialnumber/IMEI/MAC?)
 
 
@@ -168,7 +164,7 @@ SOFTWARE.Real-Time Web Technologies Guide
 - [Paolo Montrasio](https://github.com/pmontrasio), about the sentence "hey Giorgio, why don't you use SSE?".
 - [Phil Leggetter](https://github.com/leggetter), for his [Real-Time Web Technologies Guide](http://www.leggetter.co.uk/real-time-web-technologies-guide)
 - [Swanand Pagnis](https://github.com/swanandp), for his [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul)
-- [Salvatore Sanfilippo](https://github.com/antirez) I do not (yet) used REDIS here, but there is always a good reason to thank-you him.
+- [Salvatore Sanfilippo](https://github.com/antirez) I do not (yet) used http://redis.io/[REDIS](http://redis.io/) here, but there is always a good reason to thank-you him.
 
 
 # Contacts
