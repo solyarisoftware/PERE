@@ -1,7 +1,7 @@
 PERE
 ====
 
-**P**ushed **E**vents with return **R**eceipt **E**ngine: a Ruby-Sinatra SSE Pub/Sub framework.
+Pushed Events with return Receipt Engine: a Ruby-Sinatra SSE Pub/Sub framework.
 
 <img src="https://github.com/solyaris/PERE/blob/master/public/pere-logo.png" alt="PERE logo">
 
