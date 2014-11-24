@@ -1,12 +1,12 @@
 PERE
 ====
-P-ushed E-vents with return R-eceipt E-ngine: a Ruby-Sinatra SSE Pub/Sub framework
+Pushed Events with return Receipt Engine: a Ruby-Sinatra SSE Pub/Sub framework
 
 
 Simple a proof of concept code, to show how to push events using flat HTTP SSE to downstream events to clients devices with delivery receipts (using HTTP webhooks).
 
 
-## Push notifications with "certified" delivery ?
+## Push notifications with return-receipt (problem)
 
 - For some business application purposes, I need to delivery "events/messages" server-side published, to a multitude of devices.
 
@@ -23,7 +23,7 @@ Simple a proof of concept code, to show how to push events using flat HTTP SSE t
 - Just HTTP ? 
 
 
-## A Ruby-Sinatra SSE Pub/Sub framework !
+## A Ruby-Sinatra SSE Pub/Sub framework (solution)
 
 The basic idea is to implement pub/sub using Server-Sent Events aka SSE [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just HTTP streaming.
 
@@ -55,19 +55,19 @@ Usual tools: Ruby language, beloved [Sinatra](http://www.sinatrarb.com/) microfr
 
 ### Endpoints
 
-1. PUSH AN EVENT TO A CHANNEL (PUBLISH)
+PUSH AN EVENT TO A CHANNEL (PUBLISH)
 
 ```bash
 post "/push/:channel" do
 ```
 
-2. LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
+LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
 
 ```bash
 get "/feed/:channel", provides: 'text/event-stream' do
 ```
 
-3. FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
+FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
 
 ```bash
 post "/feedback/:channel" do
@@ -84,7 +84,7 @@ $ bundle install
 
 ### On the first terminal: run the server engine
 
-The Engine is a Sinatra app doing the server-side job: 
+The server is a Sinatra app doing the server-side job: 
 
 ```bash
 $ ruby sseserver.rb -o yourhostname
@@ -93,7 +93,7 @@ $ ruby sseserver.rb -o yourhostname
 
 ### On a second terminal: run a "publisher" 
 
-run a test publisher that emit / push some event every few seconds on a certain channel.
+The test publisher that emit / push some event every few seconds on a certain channel.
 
 ```bash
 $ ruby publisher.rb
@@ -114,8 +114,11 @@ $ ruby hostlistener.rb
 A web page that listen events on a certain channel, does some elaboration and feedback some status ack to server. 
 
 ```bash
-$ curl yourhostname/weblistener.html
+$ curl http://yourhostname/weblistener.html
 ```
+
+
+http://github.com/solyaris/PERE/screenshot.jpg
 
 
 ## To Do
@@ -156,16 +159,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.Real-Time Web Technologies Guide
 
 
-## Special Thanks
+## Thanks
 
 - [Paolo Montrasio](https://github.com/pmontrasio), about the sentence "hey Giorgio, why don't you use SSE?".
 - [Phil Leggetter](https://github.com/leggetter), for his [Real-Time Web Technologies Guide](http://www.leggetter.co.uk/real-time-web-technologies-guide)
 - [Swanand Pagnis](https://github.com/swanandp), for his [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul)
-- [Salvatore Sanfilippo](https://github.com/antirez) even if not (yet) used REDIS here... there is always a good reason to thank you REDIS inventor.
+- [Salvatore Sanfilippo](https://github.com/antirez) I do not (yet) used REDIS here, but there is always a good reason to thank-you him.
 
 
 # Contacts
 
-Please feel free to write an e-mail with your comments and jobs proposals are more than welcome. BTW, a mention/feedback to me will be very welcome and STAR the project if you feel it useful!
+Please feel free to write an e-mail with your comments are more than welcome. BTW, a mention/feedback to me will be very welcome and STAR the project if you feel it useful!
 
 E-mail: [giorgio.robino@gmail.com](mailto:giorgio.robino@gmail.com)

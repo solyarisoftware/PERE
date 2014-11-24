@@ -14,7 +14,7 @@ require "em-eventsource"
 # raspberrypi.stackexchange.com/questions/2086/how-do-i-get-the-serial-number
 # http://www.sitepoint.com/tour-random-ruby/
 
-hostname = "192.168.1.102:4567" 
+hostname = "#{ENV['HOSTNAME']}:4567" 
 channel = "CHANNEL_1"
 
 # to subscribe (a down-stream)
@@ -30,7 +30,7 @@ feedback_url =  "http://#{hostname}/feedback/#{channel}"
 #
 device = ["H", "0039", rand(1..9), (1..8).map{rand(0..9)}].join
 
-puts "LISTENER. device: #{device}, channel: #{channel}, hostname: #{hostname}".yellow
+puts "LISTEN (device: #{device}), channel: #{channel}, server: #{hostname}".yellow
 
 
 #
@@ -48,7 +48,7 @@ end
 
 
 EM.run do
-  source = EventMachine::EventSource.new channel_url
+  source = EventMachine::EventSource.new channel_url, device: device
 
   source.message do |event|
  

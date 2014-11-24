@@ -70,7 +70,9 @@ get "/feed/:channel", provides: 'text/event-stream' do
   # todo: check validity of channel value
   channel = params[:channel].intern
 
-  puts "FEED REQ. channel: #{channel}".yellow
+  device = params[:device]
+
+  puts "FEED REQ from device: #{device}, channel: #{channel}".yellow
 
   stream :keep_open do |out|
    settings.connections[channel] << out
@@ -86,8 +88,8 @@ post "/feedback/:channel" do
   
   # todo: STORE feedback status
 
-  puts "FEED ACK. channel: #{params[:channel]}, evtid: #{params[:id]}, \
-        device: #{params[:device]}, status: #{params[:status]}".green
+  puts "FEED BACK for channel: #{params[:channel]}, device: #{params[:device]}, \
+        evtid: #{params[:id]}, status: #{params[:status]}".green
 end
 
 

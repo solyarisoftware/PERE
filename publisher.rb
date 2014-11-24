@@ -5,7 +5,7 @@ require 'colorize'
 require 'multi_json'
 require 'rest_client'
 
-hostname = "192.168.1.102:4567"
+hostname = "#{ENV['HOSTNAME']}:4567"
 channel = "CHANNEL_1"
 
 #
@@ -15,7 +15,7 @@ channel = "CHANNEL_1"
 device = ["0039", rand(1..9), (1..8).map{rand(0..9)}].join
 
 
-puts "PUBLISHER. device: #{device}, server: #{hostname}, channel: #{channel}"
+puts "PUBLISH (device: #{device}), channel: #{channel}, server: #{hostname}"
 
 #
 # PUSH EVENT (PUBLISH a message via HTTP POST)
