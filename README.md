@@ -55,19 +55,19 @@ Usual tools: Ruby language, beloved [Sinatra](http://www.sinatrarb.com/) microfr
 
 ### Endpoints
 
-#### PUSH AN EVENT TO A CHANNEL (PUBLISH)
+- PUSH AN EVENT TO A CHANNEL (PUBLISH)
 
 ```bash
 post "/push/:channel" do
 ```
 
-#### LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
+- LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
 
 ```bash
 get "/feed/:channel", provides: 'text/event-stream' do
 ```
 
-#### FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
+- FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
 
 ```bash
 post "/feedback/:channel" do
@@ -152,7 +152,8 @@ SOFTWARE.Real-Time Web Technologies Guide
 
 - [Paolo Montrasio](https://github.com/pmontrasio), about the sentence "hey Giorgio, why don't you use SSE?".
 - [Phil Leggetter](https://github.com/leggetter), for his [Real-Time Web Technologies Guide](http://www.leggetter.co.uk/real-time-web-technologies-guide)
-- [https://github.com/swanandp](https://github.com/leggetter), for his [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul)
+- [Swanand Pagnis](https://github.com/swanandp), for his [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul)
+- [Salvatore Sanfilippo](https://github.com/antirez) even if not (yet) used REDIS here... there is always a good reason to thank you REDIS inventor.
 
 
 # Contacts
