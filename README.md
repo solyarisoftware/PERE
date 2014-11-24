@@ -1,12 +1,12 @@
 PERE
 ====
-P-ushed E-vents with return R-eceipt E-ngine: a Ruby-Sinatra SSE Pub/Sub architecture
+P-ushed E-vents with return R-eceipt E-ngine: a Ruby-Sinatra SSE Pub/Sub framework
 
 
-Simple Ruby Sinatra pub/sub architecture, to show how to push events using flat HTTP Server-Sent Eventsto downstream (JSON) events to clients devices with delivery receipts (using HTTP webhooks).
+Simple a proof of concept code, to show how to push events using flat HTTP SSE to downstream events to clients devices with delivery receipts (using HTTP webhooks).
 
 
-## Push notifications with "certified" delivery (the problem)
+## Push notifications with "certified" delivery ?
 
 - For some business application purposes, I need to delivery "events/messages" server-side published, to a multitude of devices.
 
@@ -18,12 +18,12 @@ Simple Ruby Sinatra pub/sub architecture, to show how to push events using flat 
 
 - Up-stream: The server must have some "delivery receipt" aka "return receipt" from each device that receive the events on a channel, with a status update of local elaborations.
 
-- JSON for data transport.
+- JSON for data transport is fine.
 
 - Just HTTP ? 
 
 
-## P-ushed E-vents with return R-eceipt E-ngine: a Ruby-Sinatra SSE Pub/Sub framework (a solution)
+## A Ruby-Sinatra SSE Pub/Sub framework !
 
 The basic idea is to implement pub/sub using Server-Sent Events aka SSE [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just HTTP streaming.
 
@@ -53,30 +53,51 @@ publish evt ->   | PERE  |---> channel 1 down-stream feed -> device 1
 Usual tools: Ruby language, beloved [Sinatra](http://www.sinatrarb.com/) microframework, [Thin](https://github.com/macournoyer/thin/) fast web server with EventMachine(https://github.com/eventmachine/eventmachine) event-driven I/O.
 
 
+### Endpoints
+
+#### PUSH AN EVENT TO A CHANNEL (PUBLISH)
+
+```bash
+post "/push/:channel" do
+```
+
+#### LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
+
+```bash
+get "/feed/:channel", provides: 'text/event-stream' do
+```
+
+#### FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
+
+```bash
+post "/feedback/:channel" do
+```
+
+
 ### sseserver.rb
 
-the Engine is a Sinatra app: 
+The Engine is a Sinatra app doing the server-side job: 
 
-```
+```bash
 $ ruby sseserver.rb -o yourhostname
 ```
 
 
 ### publisher.rb
 
-run a publisher that emit / push some event every few seconds on a certain channel.
+run a test publisher that emit / push some event every few seconds on a certain channel.
 
-```
+```bash
 $ ruby publisher.rb
 ```
 
 
 ### hostlistener.rb
 
-run a client host that listen events on a certain channel, does some elaboration and feedback some status ack to server. 
+run a test client host that listen events on a certain channel, does some elaboration and feedback some status ack to server. 
 
-```
-$ curl hostlistener.rb
+```bash
+$ ruby hostlistener.rb
 ```
 
 
@@ -84,9 +105,17 @@ $ curl hostlistener.rb
 
 A web page that listen events on a certain channel, does some elaboration and feedback some status ack to server. 
 
-```
+```bash
 $ curl yourhostname/weblistener.html
 ```
+
+
+## To Do
+
+- Manage SSE IDs.
+- Add a queue system to store events pushed on a channel (I guess to use REDIS)
+- better weblistener.html
+- think about some UUID to identify devices (serialnumber/IMEI/MAC?)
 
 
 ## Release Notes
@@ -116,7 +145,14 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+SOFTWARE.Real-Time Web Technologies Guide
+
+
+## Special Thanks
+
+- [Paolo Montrasio](https://github.com/pmontrasio), about the sentence "hey Giorgio, why don't you use SSE?".
+- [Phil Leggetter](https://github.com/leggetter), for his [Real-Time Web Technologies Guide](http://www.leggetter.co.uk/real-time-web-technologies-guide)
+- [https://github.com/swanandp](https://github.com/leggetter), for his [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul)
 
 
 # Contacts
