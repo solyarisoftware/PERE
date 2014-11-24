@@ -3,6 +3,9 @@ PERE
 Pushed Events with return Receipt Engine: a Ruby-Sinatra SSE Pub/Sub framework
 
 
+<img src="https://github.com/solyaris/PERE/blob/master/public/pere-logo.png" alt="PERE logo">
+
+
 Simple a proof of concept code, to show how to push events using flat HTTP SSE to downstream events to clients devices with delivery receipts (using HTTP webhooks).
 
 
@@ -118,7 +121,7 @@ $ curl http://yourhostname/weblistener.html
 ```
 
 
-http://github.com/solyaris/PERE/screenshot.jpg
+<img src="https://github.com/solyaris/PERE/blob/master/public/screenshot.jpg" alt="server screenshot">
 
 
 ## To Do
