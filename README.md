@@ -13,7 +13,7 @@ Simple a proof of concept code, to show how to push events using flat HTTP SSE t
 
 - Devices: are possibly anything: hosts clients, web browsers, mobile handset (via website or native app).
 
-- Pub/sub: Old fashioned publisher/subscriber is fine for the goal.
+- Pub/sub: old fashioned publisher/subscriber is fine for the goal.
 
 
 - Up-stream: The server must have some "delivery receipt" aka "return receipt" from each device that receive the events on a channel, with a status update of local elaborations.
@@ -50,31 +50,39 @@ publish evt ->   | PERE  |---> channel 1 down-stream feed -> device 1
 ```
 
 
-Usual tools: Ruby language, beloved [Sinatra](http://www.sinatrarb.com/) microframework, [Thin](https://github.com/macournoyer/thin/) fast web server with EventMachine(https://github.com/eventmachine/eventmachine) event-driven I/O.
+Usual tools: Ruby language, beloved [Sinatra](http://www.sinatrarb.com/) microframework, [Thin](https://github.com/macournoyer/thin/) fast web server with [EventMachine](https://github.com/eventmachine/eventmachine) event-driven I/O.
 
 
 ### Endpoints
 
-- PUSH AN EVENT TO A CHANNEL (PUBLISH)
+1. PUSH AN EVENT TO A CHANNEL (PUBLISH)
 
 ```bash
 post "/push/:channel" do
 ```
 
-- LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
+2. LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
 
 ```bash
 get "/feed/:channel", provides: 'text/event-stream' do
 ```
 
-- FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
+3. FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
 
 ```bash
 post "/feedback/:channel" do
 ```
 
+## run stuff
 
-### sseserver.rb
+above all:
+
+```bash
+$ bundle install
+```
+
+
+### On the first terminal: run the server engine
 
 The Engine is a Sinatra app doing the server-side job: 
 
@@ -83,7 +91,7 @@ $ ruby sseserver.rb -o yourhostname
 ```
 
 
-### publisher.rb
+### On a second terminal: run a "publisher" 
 
 run a test publisher that emit / push some event every few seconds on a certain channel.
 
@@ -92,7 +100,7 @@ $ ruby publisher.rb
 ```
 
 
-### hostlistener.rb
+### On (one or many devices): run a "host listener"
 
 run a test client host that listen events on a certain channel, does some elaboration and feedback some status ack to server. 
 
@@ -101,7 +109,7 @@ $ ruby hostlistener.rb
 ```
 
 
-### weblistener.html
+### On (one or many) browser windows run a "web listener"  
 
 A web page that listen events on a certain channel, does some elaboration and feedback some status ack to server. 
 
