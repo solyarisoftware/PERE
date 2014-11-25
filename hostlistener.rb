@@ -25,8 +25,9 @@ feedback_url =  "http://#{hostname}/feedback/#{channel}"
 
 
 #
-# DEVICE ID
+# SUBSCRIBER DEVICE ID
 # random number of 9 ciphers (a cellphone) 
+# 'H' for Host client 
 #
 device = ["H", "0039", rand(1..9), (1..8).map{rand(0..9)}].join
 

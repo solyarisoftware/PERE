@@ -88,8 +88,7 @@ post "/feedback/:channel" do
   
   # todo: STORE feedback status
 
-  puts "FEED BACK for channel: #{params[:channel]}, device: #{params[:device]}, \
-        evtid: #{params[:id]}, status: #{params[:status]}".green
+  puts "FEED BACK for channel: #{params[:channel]}, device: #{params[:device]}, evtid: #{params[:id]}, status: #{params[:status]}".green
 end
 
 

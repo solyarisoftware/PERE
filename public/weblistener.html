@@ -7,15 +7,31 @@
   <div id="event"></div>	
   
   <script type='text/javascript'>
-  // generate a random device ID (as a mobile phone number)
+  //
+  // generate a random device ID (sort of mobile phone number)
+  //
   function rc(min, max) { 
     return Math.floor(Math.random() * (max - min)) + min; 
   }
   
-  var device = 'M' + '0039' + rc(1,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9)  
+  // 'W' for web
+  var local_device_id = 'W' + '0039' + rc(1,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9)  
 
+  // 
+  // hardcode the channel name
+  //
+  var channel = 'CHANNEL_1'
+
+  //
+  // GET HTTP SSE MESSAGES STREAM
   // http://www.html5rocks.com/en/tutorials/eventsource/basics/
-  var es = new EventSource('/feed/CHANNEL_1');
+  //
+ 
+  // specify the device id as parameter in HTTP GET
+  // http://stackoverflow.com/questions/25254870/event-source-polyfill-send-parameters 
+  var parameters = '?device=' + local_device_id
+
+  var es = new EventSource('/feed/' + channel + parameters);
 
   es.onmessage = function(e) { 
 
@@ -27,8 +43,8 @@
   	
   	console.log(e.data); 
 
-    // feedback to server
-    $.post( "/feedback/CHANNEL_1", { id: e.lastEventId, device: device, status: "ok" } );
+    // feedback to server with a HTTP POST
+    $.post( '/feedback/' + channel, { id: e.lastEventId, device: local_device_id, status: "ok" } );
   };
   </script>
 </body>

@@ -9,10 +9,11 @@ hostname = "#{ENV['HOSTNAME']}:4567"
 channel = "CHANNEL_1"
 
 #
-# DEVICE ID
+# PUBLISHER DEVICE ID
 # random number of 9 ciphers (like a cellphone number) 
+# 'P' for publisher
 #
-device = ["0039", rand(1..9), (1..8).map{rand(0..9)}].join
+device = ['P', '0039', rand(1..9), (1..8).map{rand(0..9)}].join
 
 
 puts "PUBLISH (device: #{device}), channel: #{channel}, server: #{hostname}"
