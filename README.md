@@ -23,8 +23,8 @@ For some business application purposes, I need to delivery "events/messages" ser
   - publishers: are client (devices) that push some messages events on a "channel"
 
 - Up-stream feedbacks: 
-- The server must have some *delivery-receipt* aka *return-receipt* from each client device subscribed to receive events on a channel, with a *status update* of local elaborations.
-- "Presence" of clients devices must be tarcked by server
+  - The server must have some *delivery-receipt* aka *return-receipt* from each client device subscribed to receive events on a channel, with a *status update* of local elaborations.
+  - "Presence" of clients devices must be tarcked by server
 
 - JSON for data transport is fine.
 
@@ -34,14 +34,14 @@ For some business application purposes, I need to delivery "events/messages" ser
 ## A Ruby-Sinatra SSE Pub/Sub framework (a solution)
 
 - Just HTTP! 
-The basic idea is to implement pub/sub using *Server-Sent Events* aka EventSource aka [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just **HTTP streaming**.
+The basic idea is to implement pub/sub using *Server-Sent Events* aka EventSource aka [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just HTTP streaming.
 
 SSE pros: 
-- it's just HTTP
-- it's a HTML5 standard
+  - it's just HTTP
+  - it's a HTML5 standard
 
 SEE cons:
-- it's simplex (on-way down-streaming from a server to clients), instead Websockets are full duplex. nevertheless in the scenario of the problem, webhooks (HTTP POST from each client to the server) could be used for the up-stream communication. See the sketch: 
+  - it's simplex (on-way down-streaming from a server to clients), instead Websockets are full duplex. nevertheless in the scenario of the problem, webhooks (HTTP POST from each client to the server) could be used for the up-stream communication. See the sketch: 
 
 
 ```
@@ -107,7 +107,7 @@ $ export HOSTNAME= yourhostname
 ```bash
 $ ruby publisher.rb
 
-PUBLISH (device: P0039696456814), channel: CHANNEL_1, server: 192.168.1.102:4567
+PUBLISH (device: P0039696456814), channel: CHANNEL_1, server: yourhostname:4567
 
 PUSH EVT. event: {"channel":"CHANNEL_1","device":"P0039696456814","id":1,"time":"2014-11-25T08:12:09Z","data":"jvg2dchijlkob1afuauaohtbzzhd7ayp"}
 PUSH EVT. event: {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":"2014-11-25T08:12:25Z","data":"fa8keuulgef63154oqdo8fwcbiysha6qsd414fsf5i3phbhe0lokdyymjlwxcc3zqwt1"}
@@ -121,7 +121,7 @@ On one or many terminal (devices), run a test client host that listen events on 
 ```bash
 $ ruby hostlistener.rb
 
-LISTEN (device: H0039350488701), channel: CHANNEL_1, server: 192.168.1.102:4567
+LISTEN (device: H0039350488701), channel: CHANNEL_1, server: yourhostname:4567
 
 RX EVT: {"channel":"CHANNEL_1","device":"P0039696456814","id":1,"time":"2014-11-25T08:12:09Z","data":"jvg2dchijlkob1afuauaohtbzzhd7ayp"}
 RX EVT: {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":"2014-11-25T08:12:25Z","data":"fa8keuulgef63154oqdo8fwcbiysha6qsd414fsf5i3phbhe0lokdyymjlwxcc3zqwt1"}
@@ -145,7 +145,7 @@ $ ruby sseserver.rb -o yourhostname
 == Sinatra/1.4.5 has taken the stage on 4567 for development with backup from Thin
 Thin web server (v1.6.3 codename Protein Powder)
 Maximum connections set to 1024
-Listening on 192.168.1.102:4567, CTRL+C to stop
+Listening on yourhostname:4567, CTRL+C to stop
 FEED REQ from device: W0039344485231, channel: CHANNEL_1
 FEED REQ from device: H0039350488701, channel: CHANNEL_1
 PUSH EVT. channel: CHANNEL_1, data: {"channel":"CHANNEL_1","device":"P0039696456814","id":4,"time":"2014-11-25T08:12:50Z","data":"jwfbl6kvwy23g5ek4dotjgbmg1icivk4n6t3pjue5yabsyzfzrvhtncc9uabljwetwzk3604agcxmwoymb4bv494c0qwtbq"}
@@ -204,31 +204,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.Real-Time Web Technologies Guide
 
 
-## Credits, People to Thanks and some references about *realtime web*
-
-### People & software makers
+## Credits to people & software makers
 
 - [Paolo Montrasio](https://github.com/pmontrasio), for the remind "*hey Giorgio, why don't you use SSE?*"
 - [François de Metz](https://github.com/francois2metz), for [em-eventsource](https://github.com/AF83/em-eventsource)
-- [Kenichi Nakamura](https://github.com/kenichi) for [Angelo](https://github.com/kenichi/angelo)
-- [Salvatore Sanfilippo](https://github.com/antirez) I do not (yet) used [REDIS](http://redis.io/) here, but there is always a good reason to thank-you him
 - [Peter Ohler](https://github.com/ohler55) for [oj](https://github.com/ohler55/oj) JSON optimizer.
 - [Marc-André Cournoyer](https://github.com/macournoyer) for [Thin](https://github.com/macournoyer/thin) superfast Tiny, fast & funny HTTP server
+- [Kenichi Nakamura](https://github.com/kenichi) for [Angelo](https://github.com/kenichi/angelo)
+- [Salvatore Sanfilippo](https://github.com/antirez) I do not (yet) used [REDIS](http://redis.io/) here, but there is always a good reason to thank-you him
 
 
-### Readings
+## Readings about *realtime web*
 
-- [John Pignata](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html) for [Building Real-Time Web Applications with Server-Sent Events](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html)
-
+- [Building Real-Time Web Applications with Server-Sent Events](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html) by [John Pignata](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html)
 - [WebSockets vs. Server-Sent events/EventSource](http://stackoverflow.com/questions/5195452/websockets-vs-server-sent-events-eventsource)
 - [Stream Updates with Server-Sent Events](http://www.html5rocks.com/en/tutorials/eventsource/basics/)
-
-- [Phil Leggetter](https://github.com/leggetter), for [Real-Time Web Technologies Guide](http://www.leggetter.co.uk/real-time-web-technologies-guide) and [Web Browsers & the Realtime Web](http://www.leggetter.co.uk/2012/02/09/edinburgh-techmeetup-web-browsers-the-realtime-web.html)
-- [Swanand Pagnis](https://github.com/swanandp), for [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul)
-
+- [Real-Time Web Technologies Guide](http://www.leggetter.co.uk/real-time-web-technologies-guide) and [Web Browsers & the Realtime Web](http://www.leggetter.co.uk/2012/02/09/edinburgh-techmeetup-web-browsers-the-realtime-web.html) by [Phil Leggetter](https://github.com/leggetter) 
+- [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul) by [Swanand Pagnis](https://github.com/swanandp)
 - [Server-Sent Events and Javascript](http://www.sitepoint.com/server-sent-events/)
 - [Using server-sent events from a web application](https://developer.mozilla.org/en-US/docs/Server-sent_events/Using_server-sent_events)
-
 - [EventMachine](https://github.com/eventmachine/eventmachine/wiki)
 
 
