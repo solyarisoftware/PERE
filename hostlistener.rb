@@ -40,7 +40,7 @@ puts "LISTEN (device: #{device}), channel: #{channel}, server: #{hostname}".yell
 #
 def elaborate(event)
 
-   puts "RX EVT: #{event}".green
+   puts "RX EVT> #{event}".green
  
   # do something with event
 

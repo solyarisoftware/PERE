@@ -29,7 +29,7 @@ def push_event(hostname, channel, json_msg)
 
   begin
     response = RestClient.post url, json_msg, :content_type => :json, :accept => :json
-    puts "PUSH EVT. event: #{json_msg}".cyan # , response: #{response.code}
+    puts "PUSH EVT> event: #{json_msg}".cyan # , response: #{response.code}
   rescue => e
     puts "PUSH FAILED. #{e.message}".red
   end

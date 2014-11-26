@@ -42,6 +42,10 @@
   	$('#event').append(e.data + "\n"); 
   	
   	console.log(e.data); 
+    console.log(e.id); 
+    console.log(e.origin); 
+    console.log(e.lastEventId); 
+
 
     // feedback to server with a HTTP POST
     $.post( '/feedback/' + channel, { id: e.lastEventId, device: local_device_id, status: "ok" } );

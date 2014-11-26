@@ -47,7 +47,7 @@ post "/push/:channel" do
   data = request.body.read
 
   # log event
-  puts "PUSH EVT. channel: #{channel}, data: #{data}".cyan
+  puts "PUSH EVT> channel: #{channel}, data: #{data}".cyan
 
   # increment SSE ID data packet 
   settings.sse_id[:channel] = settings.sse_id[:channel] + 1
@@ -67,12 +67,14 @@ end
 #
 get "/feed/:channel", provides: 'text/event-stream' do
 
-  # todo: check validity of channel value
+  # TODO: check validity of channel value
   channel = params[:channel].intern
 
+  # subscriber pass his identity with parameter 'device' 
+  # TODO: check validity of device value
   device = params[:device]
 
-  puts "FEED REQ from device: #{device}, channel: #{channel}".yellow
+  puts "FEED REQ> device: #{device}, channel: #{channel}".yellow
 
   stream :keep_open do |out|
    settings.connections[channel] << out
@@ -88,24 +90,39 @@ post "/feedback/:channel" do
   
   # todo: STORE feedback status
 
-  puts "FEED BACK for channel: #{params[:channel]}, device: #{params[:device]}, evtid: #{params[:id]}, status: #{params[:status]}".green
+  puts "FEEDBACK> channel: #{params[:channel]}, device: #{params[:device]}, sseid: #{params[:id]}, status: #{params[:status]}".green
 end
 
 
+#
+# ADMIN (MONITORING)
+#
+
 get '/' do
-  MultiJson.dump :message => 'server up and running\n' 
+  MultiJson.dump :message => 'PERE server up and running\n' 
   # code = "<%= \"server up and running\n\" %>"
   #erb code
 end
 
-
 #
-# ADMIN
+# return the number of connections (= number of subscribers)
 #
-
-# http://www.tutorialspoint.com/ruby/ruby_hashes.htm
 get '/admin/connections' do
-  MultiJson.dump :connections => settings.connections  
+
+  t = 0
+  c = {}
+
+  # http://www.tutorialspoint.com/ruby/ruby_hashes.htm
+  settings.connections.each do |key,value|
+
+    # number of subscribers listening on a channel
+    c.merge! key.intern => value.size
+  
+    # total of open connections
+    t = t + value.size
+  end  
+  
+  MultiJson.dump c.merge :total => t
 end
 
 

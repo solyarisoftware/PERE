@@ -1,26 +1,26 @@
 PERE
 ====
 
-Pushed-Events with return-Receipt Engine: a Ruby-Sinatra SSE Pub/Sub simple framework.
+PUSH EVENTS with RETURN-RECEIPT Engine: a Ruby-Sinatra SSE Pub/Sub demo framework.
 
 <img src="https://github.com/solyaris/PERE/blob/master/public/pere-logo.png" alt="PERE logo">
 
-Here a simple *proof of concept* code, to show how to push events using flat HTTP SSE (down-stream) to clients devices with "delivery receipts" (up-stream feedbacks).
+Here a simple *proof of concept*/demo code, to show how to push events using flat HTTP SSE (down-stream) to clients devices with *delivery receipts* (up-stream feedbacks).
 
 
 ## Push notifications with return-receipt (the problem)
 
-For some business application purposes, I need to delivery "events/messages" server-side published, to a multitude of devices, with "garantee delivery".
+For some business application purposes, I need to delivery events (=messages) server-side published, to a multitude of devices, with an (optional) garantee delivery receipt (return-receipt) of each message sent.
 
 - Devices: are possibly "anything": 
   - hosts clients
   - web browsers on PCs
   - mobile handset (via website or native app)
 
-- Pub/sub: 
-  - old fashioned publisher/subscriber is fine for the goal 
-  - subscribers: are clients (devices) that listen events on a "channel"
-  - publishers: are client (devices) that push some messages events on a "channel"
+- Pub/sub, channels: 
+  - old fashioned publisher/subscriber fit the goal 
+  - subscribers: are clients (devices) that listen events on a *channel*
+  - publishers: are client (devices) that push some messages events on a *channel*
 
 - Up-stream feedbacks: 
   - The server must have some *delivery-receipt* aka *return-receipt* from each client device subscribed to receive events on a channel, with a *status update* of local elaborations.
@@ -34,14 +34,16 @@ For some business application purposes, I need to delivery "events/messages" ser
 ## A Ruby-Sinatra SSE Pub/Sub framework (a solution)
 
 - Just HTTP! 
-The basic idea is to implement pub/sub using *Server-Sent Events* aka EventSource aka [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just HTTP streaming.
+  - Server Push Notifications (Down-stream): The basic idea is to implement pub/sub using *Server-Sent Events* aka EventSource aka [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just HTTP streaming.
 
-SSE pros: 
-  - it's just HTTP
-  - it's a HTML5 standard
+  SSE pros: 
+    - it's just HTTP (avoiding possible nightmares with websockets on some 3G/mobile data networks)
+    - it's an HTML5 standard now (few lines of javascript on almost any modern web browser)
 
-SEE cons:
-  - it's simplex (on-way down-streaming from a server to clients), instead Websockets are full duplex. nevertheless in the scenario of the problem, webhooks (HTTP POST from each client to the server) could be used for the up-stream communication. See the sketch: 
+  SEE cons:
+    - it's simplex (on-way down-streaming from a server to clients), instead websockets are full duplex. Nevertheless in the scenario of the problem, webhooks (HTTP POST from each client to the server) could be used for the up-stream communication. See the sketch: 
+
+  - Events Feedbacks (Up-stream): Client devices reply to events notification using standard HTTP req/res (HTTP POST) to trace presence and/or feedback status of a local elaboration. On a web browser JS/AJAX is fine for the purpose. 
 
 
 ```
@@ -64,30 +66,37 @@ HTTP POST evt -> | PERE  |--- HTTP SSE events (down-stream) --> channel 1 -> dev
 Usual tools: 
 - Ruby language as glue.
 - beloved [Sinatra](http://www.sinatrarb.com/) microframework 
-- fast web server [Thin](https://github.com/macournoyer/thin/) with [EventMachine](https://github.com/eventmachine/eventmachine) event-driven I/O under thw woods.
+- fast [Thin](https://github.com/macournoyer/thin/) web server 
+- event-driven I/O under the woods [EventMachine](https://github.com/eventmachine/eventmachine)
 
 
-### Main Endpoints
+### SSEserver: Sinatra Backend Server Main Endpoints
 
-- PUBLISHER PUSH EVENTS ON A CHANNEL
-Push an event to a channel:
+- Publisher push events on a channel
+SSEserver push an event to a channel (with an HTTP POST):
 
 ```bash
 post "/push/:channel" do
+  ... 
+end  
 ```
 
-- SUBSCRIBER RECEIVE EVENTS FROM A CHANNEL
-Client device subscribe to a channel and receive events (SSE DOWN-stream):
+- Subscriber and receive events from the channel
+Client device subscribe to a channel and receive events (SSE Down-stream):
 
 ```bash
 get "/feed/:channel", provides: 'text/event-stream' do
+  ...
+end  
 ```
 
-- SUBSCRIBER REPLY FEEDBACKS
-Client previously Subscribed, reply to each event (webhooks UP-stream):
+- Subscriber reply Feedbacks
+Client previously Subscribed, reply to each event (UP-stream with HTTP POST webhooks):
 
 ```bash
 post "/feedback/:channel" do
+  ...
+end  
 ```
 
 ## Enjoy tests scripts
@@ -100,7 +109,7 @@ $ export HOSTNAME= yourhostname
 ```
 
 
-### run the *event publisher*
+### run the *event publisher* script
 
  On a terminal, the test publisher that emit / push some event every few seconds on a certain channel. An event here is a JSON containing chunk of random data as payload:
 
@@ -109,12 +118,12 @@ $ ruby publisher.rb
 
 PUBLISH (device: P0039696456814), channel: CHANNEL_1, server: yourhostname:4567
 
-PUSH EVT. event: {"channel":"CHANNEL_1","device":"P0039696456814","id":1,"time":"2014-11-25T08:12:09Z","data":"jvg2dchijlkob1afuauaohtbzzhd7ayp"}
-PUSH EVT. event: {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":"2014-11-25T08:12:25Z","data":"fa8keuulgef63154oqdo8fwcbiysha6qsd414fsf5i3phbhe0lokdyymjlwxcc3zqwt1"}
+PUSH EVT> event: {"channel":"CHANNEL_1","device":"P0039696456814","id":1,"time":"2014-11-25T08:12:09Z","data":"jvg2dchijlkob1afuauaohtbzzhd7ayp"}
+PUSH EVT> event: {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":"2014-11-25T08:12:25Z","data":"fa8keuulgef63154oqdo8fwcbiysha6qsd414fsf5i3phbhe0lokdyymjlwxcc3zqwt1"}
 ```
 
 
-### run a *host listener*
+### run a *host listener* script
 
 On one or many terminal (devices), run a test client host that listen events on a certain channel, does some elaboration and feedback some status ack to server:
 
@@ -123,8 +132,8 @@ $ ruby hostlistener.rb
 
 LISTEN (device: H0039350488701), channel: CHANNEL_1, server: yourhostname:4567
 
-RX EVT: {"channel":"CHANNEL_1","device":"P0039696456814","id":1,"time":"2014-11-25T08:12:09Z","data":"jvg2dchijlkob1afuauaohtbzzhd7ayp"}
-RX EVT: {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":"2014-11-25T08:12:25Z","data":"fa8keuulgef63154oqdo8fwcbiysha6qsd414fsf5i3phbhe0lokdyymjlwxcc3zqwt1"}
+RX EVT> {"channel":"CHANNEL_1","device":"P0039696456814","id":1,"time":"2014-11-25T08:12:09Z","data":"jvg2dchijlkob1afuauaohtbzzhd7ayp"}
+RX EVT> {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":"2014-11-25T08:12:25Z","data":"fa8keuulgef63154oqdo8fwcbiysha6qsd414fsf5i3phbhe0lokdyymjlwxcc3zqwt1"}
 ```
 
 
@@ -146,17 +155,26 @@ $ ruby sseserver.rb -o yourhostname
 Thin web server (v1.6.3 codename Protein Powder)
 Maximum connections set to 1024
 Listening on yourhostname:4567, CTRL+C to stop
-FEED REQ from device: W0039344485231, channel: CHANNEL_1
-FEED REQ from device: H0039350488701, channel: CHANNEL_1
+FEED REQ> device: W0039344485231, channel: CHANNEL_1
+FEED REQ> device: H0039350488701, channel: CHANNEL_1
 PUSH EVT. channel: CHANNEL_1, data: {"channel":"CHANNEL_1","device":"P0039696456814","id":4,"time":"2014-11-25T08:12:50Z","data":"jwfbl6kvwy23g5ek4dotjgbmg1icivk4n6t3pjue5yabsyzfzrvhtncc9uabljwetwzk3604agcxmwoymb4bv494c0qwtbq"}
-FEED BACK for channel: CHANNEL_1, device: H0039350488701, evtid: 1, status: ok
-FEED BACK for channel: CHANNEL_1, device: W0039344485231, evtid: 1, status: ok
+FEED BCK> for channel: CHANNEL_1, device: H0039350488701, evtid: 1, status: ok
+FEED BCK> for channel: CHANNEL_1, device: W0039344485231, evtid: 1, status: ok
 PUSH EVT. channel: CHANNEL_1, data: {"channel":"CHANNEL_1","device":"P0039696456814","id":5,"time":"2014-11-25T08:13:01Z","data":"752a0mv6u6qbcbe6ohooc09zu4a78fljwkq1llkgdna6jnkllchcr51f0k42covgbymxkuo980to85q3h0rsbbygrzxt38sgvngx3w5ewb3dymx1le4itf"}
-FEED BACK for channel: CHANNEL_1, device: W0039344485231, evtid: 2, status: ok
-FEED BACK for channel: CHANNEL_1, device: H0039350488701, evtid: 2, status: ok
+FEED BCK> for channel: CHANNEL_1, device: W0039344485231, evtid: 2, status: ok
+FEED BCK> for channel: CHANNEL_1, device: H0039350488701, evtid: 2, status: ok
 ^CStopping ...
 Stopping ...
 == Sinatra has ended his set (crowd applauds)
+
+```
+
+### Connections Monitor
+Just to know how many open connections there are for each channel:
+
+```
+$ curl yourhost:4567/admin/connections
+{"CHANNEL_1":2,"total":2}
 
 ```
 
@@ -168,13 +186,15 @@ Stopping ...
 - Less raugh weblistener.html
 - Think about some UUID to identify devices (serialnumber/IMEI/MAC?)
 - Add some Admin endpoints (to monitor connections number / devices listening)
-- Manage PRESENCE of devices 
+- Manage PRESENCE of devices
+- Add a bit of security (token-ids for each publisher/subscriber)
 
 
 ## Release Notes
 
-### v.0.0.2  - 25 November 2014
+### v.0.0.2  - 26 November 2014
 - weblistener.html: supply correctly the "device id"
+- /admin/connections: a bit of monitoring
 
 ### v.0.0.1 - 24 November 2014
 - First release. 
@@ -221,7 +241,7 @@ SOFTWARE.Real-Time Web Technologies Guide
 - [Stream Updates with Server-Sent Events](http://www.html5rocks.com/en/tutorials/eventsource/basics/)
 - [Real-Time Web Technologies Guide](http://www.leggetter.co.uk/real-time-web-technologies-guide) and [Web Browsers & the Realtime Web](http://www.leggetter.co.uk/2012/02/09/edinburgh-techmeetup-web-browsers-the-realtime-web.html) by [Phil Leggetter](https://github.com/leggetter) 
 - [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul) by [Swanand Pagnis](https://github.com/swanandp)
-- [Server-Sent Events and Javascript](http://www.sitepoint.com/server-sent-events/)
+- [Server-Sent Events and Javascript](http://www.sitepoint.com/server-sent-events/) by [Tiffany B. Brown](https://twitter.com/webinista)
 - [Using server-sent events from a web application](https://developer.mozilla.org/en-US/docs/Server-sent_events/Using_server-sent_events)
 - [EventMachine](https://github.com/eventmachine/eventmachine/wiki)
 
@@ -230,5 +250,5 @@ SOFTWARE.Real-Time Web Technologies Guide
 
 Please feel free to write an e-mail with your comments are more than welcome. BTW, a mention/feedback to me will be very welcome and STAR the project if you feel it useful!
 
-twitter: [@solyarisoftware](twitter.com/solyarisoftware)
+twitter: [@solyarisoftware](www.twitter.com/solyarisoftware)
 e-mail: [giorgio.robino@gmail.com](mailto:giorgio.robino@gmail.com)
