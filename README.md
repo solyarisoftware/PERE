@@ -33,8 +33,8 @@ For some business application purposes, I need to delivery events (=messages) se
 
 ## A Ruby-Sinatra SSE Pub/Sub framework (a solution)
 
-- Just HTTP! 
-  - Server Push Notifications (Down-stream): The basic idea is to implement pub/sub using *Server-Sent Events* aka EventSource aka [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just HTTP streaming.
+- Just HTTP! for Server Push Notifications (Down-stream):
+The basic idea is to implement pub/sub using *Server-Sent Events* aka EventSource aka [SSE](http://www.w3.org/TR/eventsource/) HTML5 technology: just HTTP streaming.
 
   SSE pros: 
     - it's just HTTP (avoiding possible nightmares with websockets on some 3G/mobile data networks)
@@ -43,7 +43,8 @@ For some business application purposes, I need to delivery events (=messages) se
   SEE cons:
     - it's simplex (on-way down-streaming from a server to clients), instead websockets are full duplex. Nevertheless in the scenario of the problem, webhooks (HTTP POST from each client to the server) could be used for the up-stream communication. See the sketch: 
 
-  - Events Feedbacks (Up-stream): Client devices reply to events notification using standard HTTP req/res (HTTP POST) to trace presence and/or feedback status of a local elaboration. On a web browser JS/AJAX is fine for the purpose. 
+- Just HTTP! for Events Feedbacks (Up-stream): 
+Client devices reply to events notification using standard HTTP req/res (HTTP POST) to trace presence and/or feedback status of a local elaboration. On a web browser JS/AJAX is fine for the purpose. 
 
 
 ```
@@ -250,5 +251,5 @@ SOFTWARE.Real-Time Web Technologies Guide
 
 Please feel free to write an e-mail with your comments are more than welcome. BTW, a mention/feedback to me will be very welcome and STAR the project if you feel it useful!
 
-twitter: [@solyarisoftware](www.twitter.com/solyarisoftware)
+twitter: [@solyarisoftware](http://www.twitter.com/solyarisoftware)
 e-mail: [giorgio.robino@gmail.com](mailto:giorgio.robino@gmail.com)
