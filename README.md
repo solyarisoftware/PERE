@@ -66,7 +66,7 @@ HTTP POST evt -> | PERE  |--- HTTP SSE events (down-stream) --> channel 1 -> dev
 
 Usual tools: 
 - Ruby language as glue.
-- beloved [Sinatra](http://www.sinatrarb.com/) microframework 
+- beloved [Sinatra](https://github.com/sinatra/sinatra) microframework 
 - fast [Thin](https://github.com/macournoyer/thin/) web server 
 - event-driven I/O under the woods [EventMachine](https://github.com/eventmachine/eventmachine)
 
@@ -124,12 +124,12 @@ PUSH EVT> event: {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":
 ```
 
 
-### run a *host listener* script
+### run a *host subscriber* script
 
 On one or many terminal (devices), run a test client host that listen events on a certain channel, does some elaboration and feedback some status ack to server:
 
 ```bash
-$ ruby hostlistener.rb
+$ ruby subscriber.rb
 
 LISTEN (device: H0039350488701), channel: CHANNEL_1, server: yourhostname:4567
 
@@ -138,7 +138,7 @@ RX EVT> {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":"2014-11-
 ```
 
 
-### run a *web listener*  
+### run a *web subscriber*  
 
 On (one or many) browser windows, open a web page that listen events events on a certain channel (using standard SSE HTML Javascript code), does some elaboration and feedback some status ack to server:
 
@@ -182,9 +182,9 @@ $ curl yourhost:4567/admin/connections
 
 ## To Do
 
-- Manage SSE IDs! (client re-synch to last SSE ID).
+- Manage SSE IDs! (client re-synch/reconnection an get events from last SSE ID).
 - Add a queue system to store events pushed on each channel (I guess to use REDIS)
-- Less raugh weblistener.html
+- Less raugh subscriber.html
 - Think about some UUID to identify devices (serialnumber/IMEI/MAC?)
 - Add some Admin endpoints (to monitor connections number / devices listening)
 - Manage PRESENCE of devices
@@ -193,8 +193,8 @@ $ curl yourhost:4567/admin/connections
 
 ## Release Notes
 
-### v.0.0.2  - 26 November 2014
-- weblistener.html: supply correctly the "device id"
+### v.0.0.2  - 27 November 2014
+- subscriber.html: supply correctly the "device id"
 - /admin/connections: a bit of monitoring
 
 ### v.0.0.1 - 24 November 2014
@@ -225,7 +225,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.Real-Time Web Technologies Guide
 
 
-## Credits to people & software makers
+## Credits to people / software makers
 
 - [Paolo Montrasio](https://github.com/pmontrasio), for the remind "*hey Giorgio, why don't you use SSE?*"
 - [François de Metz](https://github.com/francois2metz), for [em-eventsource](https://github.com/AF83/em-eventsource)
@@ -235,8 +235,14 @@ SOFTWARE.Real-Time Web Technologies Guide
 - [Salvatore Sanfilippo](https://github.com/antirez) I do not (yet) used [REDIS](http://redis.io/) here, but there is always a good reason to thank-you him
 
 
-## Readings about *realtime web*
+## Readings about *realtime web and SSE*
 
+The book!
+- [Data Push Apps with HTML5 SSE ](http://shop.oreilly.com/product/0636920030928.do) superb book (also avalialbl as ebook) by [Darren Cook](http://stackoverflow.com/users/841830/darren-cook)
+
+<img src="http://akamaicovers.oreilly.com/images/0636920030928/lrg.jpg" height="50%" alt="the book">
+
+Online readings:
 - [Building Real-Time Web Applications with Server-Sent Events](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html) by [John Pignata](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html)
 - [WebSockets vs. Server-Sent events/EventSource](http://stackoverflow.com/questions/5195452/websockets-vs-server-sent-events-eventsource)
 - [Stream Updates with Server-Sent Events](http://www.html5rocks.com/en/tutorials/eventsource/basics/)

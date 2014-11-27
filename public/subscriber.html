@@ -1,0 +1,58 @@
+<html>
+<head> 
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+</head> 
+<body>
+  <div id="event"></div>	
+  
+  <script type='text/javascript'>
+  // generate a random device ID (sort of mobile phone number)
+  function rc(min, max) { 
+    return Math.floor(Math.random() * (max - min)) + min; 
+  }
+  
+  // 'W' for web
+  var local_device_id = 'W' + '0039' + rc(1,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9) + rc(0,9)  
+
+  // hardcode the channel name
+  var channel = 'CHANNEL_1'
+
+  //
+  // GET HTTP SSE MESSAGES STREAM
+  // http://www.html5rocks.com/en/tutorials/eventsource/basics/
+  // http://chimera.labs.oreilly.com/books/1230000000545/ch16.html#EVENTSOURCE_API
+  //
+ 
+  // specify the device id as parameter in HTTP GET
+  // http://stackoverflow.com/questions/25254870/event-source-polyfill-send-parameters 
+  var parameters = '?device=' + local_device_id
+
+  var source = new EventSource('/feed/' + channel + parameters);
+
+  source.onmessage = function(event) { 
+
+  	console.log(event.data); 
+    console.log(event.id); 
+    console.log(event.origin); 
+    console.log(event.lastEventId); 
+
+    //if (e.id == "CLOSE") { source.close(); }
+
+    //if (e.origin != 'http://example.com') {
+    //  alert('Origin was not http://example.com');
+    //return;
+
+    $('#event').append(event.data + "\n"); 
+
+    // feedback to server with a HTTP POST
+    $.post( '/feedback/' + channel, { id: event.lastEventId, device: local_device_id, status: "ok" } );
+  };
+
+  //source.onopen = function () { ... }; 
+  //source.onerror = function () { ... };
+  //source.addEventListener("foo", function (event) { processFoo(event.data); });
+
+  </script>
+</body>
+</html>
