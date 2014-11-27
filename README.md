@@ -7,6 +7,8 @@ PUSH EVENTS with RETURN-RECEIPT Engine: a Ruby-Sinatra SSE Pub/Sub demo framewor
 
 Here a simple *proof of concept*/demo code, to show how to push events using flat HTTP SSE (down-stream) to clients devices with *delivery receipts* (up-stream feedbacks).
 
+BTW, "PERE" is an acronym for "Push Events Receipt Engine" and muy mother tongue language (Italian), "pere" means "pears" (the fruit) :-) 
+
 
 ## Push notifications with return-receipt (the problem)
 
