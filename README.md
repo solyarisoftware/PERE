@@ -238,9 +238,9 @@ SOFTWARE.Real-Time Web Technologies Guide
 ## Readings about *realtime web and SSE*
 
 The book!
-- [Data Push Apps with HTML5 SSE ](http://shop.oreilly.com/product/0636920030928.do) superb book (also avalialbl as ebook) by [Darren Cook](http://stackoverflow.com/users/841830/darren-cook)
+- [Data Push Apps with HTML5 SSE](http://shop.oreilly.com/product/0636920030928.do) superb book (also avalialbl as ebook) by [Darren Cook](http://stackoverflow.com/users/841830/darren-cook)
 
-<img src="http://akamaicovers.oreilly.com/images/0636920030928/lrg.jpg" height="50%" alt="the book">
+<img src="http://akamaicovers.oreilly.com/images/0636920030928/lrg.jpg" width="50%" height="50%" alt="Data Push Apps with HTML5 SSE">
 
 Online readings:
 - [Building Real-Time Web Applications with Server-Sent Events](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html) by [John Pignata](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html)
