@@ -14,7 +14,7 @@ disable :logging
 # a web server with a event machine engine
 set server: 'thin' 
 
-# connections 
+# Channel connections 
 # global hash containing a list of connections (one list for every channel)
 # each connection is inialized with a void list
 #
@@ -24,7 +24,7 @@ set server: 'thin'
 #
 set connections:  Hash.new {|h, k| h[k] = [] }
 
-# sse_id 
+# Channel sse_id 
 # global hash containing channel ID counter (one for every channel)
 # each ID is initailized to 0
 #
@@ -72,9 +72,6 @@ post "/push/:channel" do
   # read message as (JSON) payload in HTTP request BODY 
   data = request.body.read
 
-  # log event
-  puts "PUSH EVT> channel: #{channel}, device: #{device}, data: #{data}".cyan
-
   # increment SSE ID data packet 
   settings.sse_id[:channel] = settings.sse_id[:channel] + 1
   id = settings.sse_id[:channel]
@@ -83,6 +80,10 @@ post "/push/:channel" do
     sse_event = "id: #{id}\ndata: #{data}\n\n"
     connection << sse_event
   end
+
+  # log event
+  puts "PUSH EVT> channel: #{channel}, device: #{device}, id: #{id}, data: #{data}".cyan
+
   
   log_params if settings.debug
 
@@ -166,7 +167,7 @@ get '/admin/connections' do
     t = t + value.size
   end  
   
-  MultiJson.dump c.merge :total => t
+  MultiJson.dump c.merge :'total number' => t
 end
 
 

@@ -39,12 +39,12 @@ end
 #
 # PUBLISH an event every N seconds
 #
-publisher_id = 0
+pub_id = 0
 loop do
   # prepare SSE event data, with random data
 
   # application message id
-  publisher_id = publisher_id + 1
+  pub_id = pub_id + 1
 
   # time now in ISO 8601
   time = Time.now.utc.iso8601
@@ -53,7 +53,7 @@ loop do
   data = rand(36**(rand 15..128)).to_s(36)
   
   # crete the JSON payload
-  json_msg = MultiJson.dump( { channel: channel, publisher_id: publisher_id, time: time, data: data } )
+  json_msg = MultiJson.dump( { channel: channel, pub_id: pub_id, time: time, data: data } )
 
   # push event as HTTP POST
   push_event hostname, channel, json_msg, device

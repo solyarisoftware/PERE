@@ -18,6 +18,9 @@
   // hardcode the channel name
   var channel = 'CHANNEL_1'
 
+
+  $('#event').html('connecting to channel: ' + channel + ', device: ' + local_device_id + "\n"); 
+
   //
   // GET HTTP SSE MESSAGES STREAM
   // http://www.html5rocks.com/en/tutorials/eventsource/basics/
@@ -46,7 +49,17 @@
     $('#event').append(event.data + "\n"); 
 
     // feedback to server with a HTTP POST
-    $.post( '/feedback/' + channel, { id: event.lastEventId, device: local_device_id, status: "ok" } );
+    // pass device and last_event_id as params in http header
+    // http://wilbloodworth.com/add-request-headers-in-ajax-http-post-using-jquery/
+    $.ajax({
+        url: '/feedback/' + channel,
+        type: 'POST',
+        data: { status: 'ok' },
+        beforeSend: function (xhr) { 
+          xhr.setRequestHeader('device', local_device_id);
+          xhr.setRequestHeader('Last-Event-ID', event.lastEventId);
+        }
+    }); 
   };
 
   //source.onopen = function () { ... }; 
