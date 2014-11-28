@@ -34,6 +34,29 @@ set connections:  Hash.new {|h, k| h[k] = [] }
 #
 set sse_id: Hash.new {|h, k| h[k] = 0 }
 
+set debug: false
+
+
+# for debug
+def log_params
+  puts "query params:"
+  params.each {|key, value| puts "\t#{key} = #{value}"}
+  puts "HTTP headers:"
+  env.select { |key, value| key.to_s.match(/^HTTP_*/) }.each {|key, value| puts "\t#{key} = #{value}"}
+end
+
+
+#
+# return the value of an HTTP header param 
+# return nil of param doesn't exist
+#
+# Note: Sinatra add prefix HTTP_ an do some string upcase to any header param,
+# e.g. 'Last-Event-ID' become 'HTTP_LAST_EVENT_ID'
+#
+def header(param)
+  env[ "HTTP_#{param.gsub('-', '_').upcase}" ]
+end
+
 
 #
 # PUSH AN EVENT TO A CHANNEL (PUBLISH)
@@ -43,11 +66,14 @@ post "/push/:channel" do
   # todo: check validity of channel value
   channel = params[:channel].intern
 
+  # get device as param in HTTP request HEADER
+  device = header 'device'
+
   # read message as (JSON) payload in HTTP request BODY 
   data = request.body.read
 
   # log event
-  puts "PUSH EVT> channel: #{channel}, data: #{data}".cyan
+  puts "PUSH EVT> channel: #{channel}, device: #{device}, data: #{data}".cyan
 
   # increment SSE ID data packet 
   settings.sse_id[:channel] = settings.sse_id[:channel] + 1
@@ -57,8 +83,11 @@ post "/push/:channel" do
     sse_event = "id: #{id}\ndata: #{data}\n\n"
     connection << sse_event
   end
+  
+  log_params if settings.debug
 
-  status 200
+  # https://gist.github.com/rkh/1476463
+  204 # response without entity body # status 200
 end
 
 
@@ -66,20 +95,29 @@ end
 # LISTEN EVENTS FROM A CHANNEL (SUBSCRIBE & UP-STREAM)
 #
 get "/feed/:channel", provides: 'text/event-stream' do
+ 
+  # https://github.com/sinatra/sinatra/blob/master/lib/sinatra/base.rb#L441
+  cache_control :no_cache
 
   # TODO: check validity of channel value
   channel = params[:channel].intern
 
   # subscriber pass his identity with parameter 'device' 
   # TODO: check validity of device value
-  device = params[:device]
+  device = header 'device' # params[:device]
 
-  puts "FEED REQ> device: #{device}, channel: #{channel}".yellow
+  # get last event id from http header param
+  last_event_id = header 'Last-Event-Id'
+
+  puts "FEED REQ> device: #{device}, channel: #{channel}, Last-Event-Id: #{last_event_id ? last_event_id : 'nil'}".yellow
 
   stream :keep_open do |out|
    settings.connections[channel] << out
+
    out.callback { settings.connections[channel].delete(out) }
   end
+  
+  log_params if settings.debug
 end  
 
 
@@ -87,10 +125,16 @@ end
 # FEEDBACK FROM CLIENTS (WEBHOOK UP-STREAM)
 #
 post "/feedback/:channel" do
-  
-  # todo: STORE feedback status
 
-  puts "FEEDBACK> channel: #{params[:channel]}, device: #{params[:device]}, sseid: #{params[:id]}, status: #{params[:status]}".green
+  # get params from HTTP header
+  device = header 'device'
+  last_event_id = header 'last_event_id'
+
+  # todo: STORE feedback status
+  puts "FEEDBACK> channel: #{params[:channel]}, device: #{device}, last_event_id: #{last_event_id}, status: #{params[:status]}".green
+
+  log_params if settings.debug
+
 end
 
 

@@ -195,8 +195,8 @@ $ curl yourhost:4567/admin/connections
 
 ## Release Notes
 
-### v.0.0.2  - 27 November 2014
-- subscriber.html: supply correctly the "device id"
+### v.0.0.3  - 28 November 2014
+- understood how to manage Last-Event-ID (as http header param)
 - /admin/connections: a bit of monitoring
 
 ### v.0.0.1 - 24 November 2014

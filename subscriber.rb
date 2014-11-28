@@ -49,17 +49,28 @@ end
 
 
 EM.run do
-  source = EventMachine::EventSource.new channel_url, device: device
+  
+  query =  {}
+  headers = {device: device}
+
+  source = EventMachine::EventSource.new channel_url, query, headers
 
   source.message do |event|
  
     # elaborate receive message event and set elaboration status
     status =  elaborate event
 
-    id = source.last_event_id
+    last_event_id = source.last_event_id
 
     # send back an HTTP POST /feedback/:channel with status info
-    response = RestClient.post feedback_url, id: id, device: device, status: status 
+    #
+    # http://stackoverflow.com/questions/12161640/setting-request-headers-in-ruby
+    # http://stackoverflow.com/questions/20511661/accessing-header-params-in-restclient-api-get-call
+    query = { status: status }
+    headers = { device: device, last_event_id: last_event_id }
+
+    response = RestClient.post feedback_url, query, headers 
+                               
   end
 
   source.start # Start listening

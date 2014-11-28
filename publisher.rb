@@ -21,14 +21,14 @@ puts "PUBLISH (device: #{device}), channel: #{channel}, server: #{hostname}"
 #
 # PUSH EVENT (PUBLISH a message via HTTP POST)
 #
-def push_event(hostname, channel, json_msg) 
+def push_event(hostname, channel, json_msg, device) 
   url = "http://#{hostname}/push/#{channel}"    
 
   # message payload in JSON format, in HTTP body 
   # https://github.com/rest-client/rest-client
 
   begin
-    response = RestClient.post url, json_msg, :content_type => :json, :accept => :json
+    response = RestClient.post url, json_msg, :content_type => :json, :accept => :json, device: device
     puts "PUSH EVT> event: #{json_msg}".cyan # , response: #{response.code}
   rescue => e
     puts "PUSH FAILED. #{e.message}".red
@@ -39,12 +39,12 @@ end
 #
 # PUBLISH an event every N seconds
 #
-appmsg_id = 0
+publisher_id = 0
 loop do
   # prepare SSE event data, with random data
 
   # application message id
-  appmsg_id = appmsg_id + 1
+  publisher_id = publisher_id + 1
 
   # time now in ISO 8601
   time = Time.now.utc.iso8601
@@ -53,10 +53,10 @@ loop do
   data = rand(36**(rand 15..128)).to_s(36)
   
   # crete the JSON payload
-  json_msg = MultiJson.dump( { channel: channel, device: device, id: appmsg_id, time: time, data: data } )
+  json_msg = MultiJson.dump( { channel: channel, publisher_id: publisher_id, time: time, data: data } )
 
   # push event as HTTP POST
-  push_event hostname, channel, json_msg
+  push_event hostname, channel, json_msg, device
 
   # sleep for N seconds
   sleep ( rand 10..20 )
