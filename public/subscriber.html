@@ -27,7 +27,8 @@
   // http://chimera.labs.oreilly.com/books/1230000000545/ch16.html#EVENTSOURCE_API
   //
  
-  // specify the device id as parameter in HTTP GET
+  // specify the device id as query parameter in the EventSource HTTP GET
+  // http://stackoverflow.com/questions/6109418/how-exactly-does-server-sent-events-work?rq=1
   // http://stackoverflow.com/questions/25254870/event-source-polyfill-send-parameters 
   var parameters = '?device=' + local_device_id
 
@@ -57,14 +58,17 @@
         data: { status: 'ok' },
         beforeSend: function (xhr) { 
           xhr.setRequestHeader('device', local_device_id);
+
+          // debug purposes
           xhr.setRequestHeader('Last-Event-ID', event.lastEventId);
         }
     }); 
   };
 
-  //source.onopen = function () { ... }; 
-  //source.onerror = function () { ... };
-  //source.addEventListener("foo", function (event) { processFoo(event.data); });
+  // Todo
+  // source.onopen = function () { ... }; 
+  // source.onerror = function () { ... };
+  // source.addEventListener("foo", function (event) { processFoo(event.data); });
 
   </script>
 </body>

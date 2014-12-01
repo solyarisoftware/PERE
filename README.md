@@ -50,30 +50,39 @@ Client devices reply to events notification using standard HTTP req/res (HTTP PO
 
 
 ```
-                 .-------.
-HTTP POST evt -> | PERE  |--- HTTP SSE events (down-stream) --> channel 1 -> device 1 
-                 |       |<-- HTTP POST (up-stream) status  <---------------
-                 |       | 
-                 |       |--- HTTP SSE events (down-stream) --> channel 1 -> device 2
-                 |       |<-- HTTP POST (up-stream) status  <--------------- 
-                 |       |                
-                 |       |--- HTTP SSE events (down-stream) --> channel 1 -> device N
-                 |       |<-- HTTP POST (up-stream) status  <---------------
-                 |       | 
-                 |       |--- HTTP SSE events (down-stream) --> channel N ->
-                 .-------.                                              
+
+Publishers Devices   PERE server                                         Subscriber Devices
+          |               |                                                    |
+          v               v                                                    v
+                   .-------------.
+  HTTP POST evt -> | -> queue -> |--- HTTP SSE events  --> channel 1 -> device 1 
+                   |   status <- |<-- HTTP POST status <---------------
+                   |             |
+                   | -> queue -> |--- HTTP SSE events  --> channel 1 -> device 2
+                   |   status <- |<-- HTTP POST status <--------------- 
+                   |             |           
+                   | -> queue -> |--- HTTP SSE events  --> channel 1 -> device N
+                   |   status <- |<-- HTTP POST status <---------------
+                   |             |
+                   | -> queue -> |--- HTTP SSE events  --> channel N ->
+                   .-------------.                                              
+                          ^
+                          |
+                    admin queries    
 
 ```
 
 
 Usual tools: 
 - Ruby language as glue.
-- beloved [Sinatra](https://github.com/sinatra/sinatra) microframework 
-- fast [Thin](https://github.com/macournoyer/thin/) web server 
-- event-driven I/O under the woods [EventMachine](https://github.com/eventmachine/eventmachine)
+- Beloved [Sinatra](https://github.com/sinatra/sinatra) microframework 
+- Fast [Thin](https://github.com/macournoyer/thin/) web server 
+- Event-driven I/O under the woods [EventMachine](https://github.com/eventmachine/eventmachine)
 
 
-### SSEserver: Sinatra Backend Server Main Endpoints
+### SSEserver: Sinatra API Server
+
+The backend is an API server that accept three main endpoints:
 
 - Publisher push events on a channel
 SSEserver push an event to a channel (with an HTTP POST):
@@ -112,7 +121,21 @@ $ export HOSTNAME= yourhostname
 ```
 
 
-### run the *event publisher* script
+### run PERE API server!
+
+On the first terminal run the server, a Sinatra engine doing the back-end job: 
+
+```bash
+$ ruby pere.rb -o yourhostname
+
+== Sinatra/1.4.5 has taken the stage on 4567 for development with backup from Thin
+Thin web server (v1.6.3 codename Protein Powder)
+Maximum connections set to 1024
+Listening on yourhostname:4567, CTRL+C to stop
+```
+
+
+### run the *event publisher* test script
 
  On a terminal, the test publisher that emit / push some event every few seconds on a certain channel. An event here is a JSON containing chunk of random data as payload:
 
@@ -147,57 +170,114 @@ On (one or many) browser windows, open a web page that listen events events on a
 <img src="https://github.com/solyaris/PERE/blob/master/public/screenshot.jpg" alt="server screenshot">
 
 
-### run the SSEserver engine
+### PERE logs
 
-On the first terminal run the server, a Sinatra app doing the server-side job: 
+On the engine terminal you can watch what happen with stdout logs:
+
 
 ```bash
-$ ruby sseserver.rb -o yourhostname
-
 == Sinatra/1.4.5 has taken the stage on 4567 for development with backup from Thin
 Thin web server (v1.6.3 codename Protein Powder)
 Maximum connections set to 1024
-Listening on yourhostname:4567, CTRL+C to stop
-FEED REQ> device: W0039344485231, channel: CHANNEL_1
-FEED REQ> device: H0039350488701, channel: CHANNEL_1
-PUSH EVT. channel: CHANNEL_1, data: {"channel":"CHANNEL_1","device":"P0039696456814","id":4,"time":"2014-11-25T08:12:50Z","data":"jwfbl6kvwy23g5ek4dotjgbmg1icivk4n6t3pjue5yabsyzfzrvhtncc9uabljwetwzk3604agcxmwoymb4bv494c0qwtbq"}
-FEED BCK> for channel: CHANNEL_1, device: H0039350488701, evtid: 1, status: ok
-FEED BCK> for channel: CHANNEL_1, device: W0039344485231, evtid: 1, status: ok
-PUSH EVT. channel: CHANNEL_1, data: {"channel":"CHANNEL_1","device":"P0039696456814","id":5,"time":"2014-11-25T08:13:01Z","data":"752a0mv6u6qbcbe6ohooc09zu4a78fljwkq1llkgdna6jnkllchcr51f0k42covgbymxkuo980to85q3h0rsbbygrzxt38sgvngx3w5ewb3dymx1le4itf"}
-FEED BCK> for channel: CHANNEL_1, device: W0039344485231, evtid: 2, status: ok
-FEED BCK> for channel: CHANNEL_1, device: H0039350488701, evtid: 2, status: ok
+Listening on 192.168.1.103:4567, CTRL+C to stop
+FEED REQ> device: H0039526449233, channel: CHANNEL_1, Last-Event-Id: 2014-12-01T15:01:45.025Z
+FEED REQ> device: H0039701836021, channel: CHANNEL_1, Last-Event-Id: 2014-12-01T15:01:45.025Z
+PUSH EVT> channel: CHANNEL_1, device: P0039440629675, Event-Id: 2014-12-01T15:02:07.066Z, data: {"channel":"CHANNEL_1","pub_id":179,"data":"kypcav3np07xdoq9yj91798dofm"}
+FEEDBACK> channel: CHANNEL_1, device: H0039526449233, Last-Event-Id: 2014-12-01T15:02:07.066Z, status: rx ok
+FEEDBACK> channel: CHANNEL_1, device: H0039701836021, Last-Event-Id: 2014-12-01T15:02:07.066Z, status: rx ok
+PUSH EVT> channel: CHANNEL_1, device: P0039440629675, Event-Id: 2014-12-01T15:02:25.104Z, data: {"channel":"CHANNEL_1","pub_id":180,"data":"90su3d2zs5iaen"}
+FEEDBACK> channel: CHANNEL_1, device: H0039701836021, Last-Event-Id: 2014-12-01T15:02:25.104Z, status: rx ok
+FEEDBACK> channel: CHANNEL_1, device: H0039526449233, Last-Event-Id: 2014-12-01T15:02:25.104Z, status: rx ok
+PUSH EVT> channel: CHANNEL_1, device: P0039440629675, Event-Id: 2014-12-01T15:02:35.151Z, data: {"channel":"CHANNEL_1","pub_id":181,"data":"vssis31pylxz0dx"}
+FEEDBACK> channel: CHANNEL_1, device: H0039701836021, Last-Event-Id: 2014-12-01T15:02:35.151Z, status: rx ok
+FEEDBACK> channel: CHANNEL_1, device: H0039526449233, Last-Event-Id: 2014-12-01T15:02:35.151Z, status: rx ok
 ^CStopping ...
 Stopping ...
 == Sinatra has ended his set (crowd applauds)
 
 ```
 
-### Connections Monitor
-Just to know how many open connections there are for each channel:
+### Monitor status
+
+Some endpoints are available to monitor internal status / memory
+
+To know how many open connections there are for each channel:
 
 ```
 $ curl yourhost:4567/admin/connections
-{"CHANNEL_1":2,"total":2}
+{
+  "CHANNEL_1":4,
+  "CHANNEL_3":2,
+  "total number":6
+}
+```
 
+Events list for each channel:
+
+```
+$ curl yourhost:4567/admin/events/CHANNEL_1
+[
+  {
+    "device":"P0039163746978",
+    "time":"2014-12-01T15:09:15.691Z",
+    "id":1,
+    "data":"l6rqih112by5hl7z21"
+  },
+  {
+    "device":"P0039163746978",
+    "time":"2014-12-01T15:09:35.751Z",
+    "id":2,
+    "data":"3hxolcaxf5buax6nou9"
+  },
+  {
+    "device":"P0039163746978",
+    "time":"2014-12-01T15:09:55.812Z",
+    "id":3,
+    "data":"6ovkzc0dxr4ypge9t"
+  }
+]
+```
+
+Devices (subscribers) list (status & presence) on a channel:
+
+```
+$ curl yourhost:4567/admin/devices/CHANNEL_1
+{
+  "H0039258085863":{
+    "op":"feedback",
+    "at":"2014-12-01T14:28:30.993Z",
+    "Last-Event-Id":"2014-12-01T14:28:30.969Z"
+  },
+  "H0039526449233":{
+    "op":"feedback",
+    "at":"2014-12-01T14:36:04.910Z",
+    "Last-Event-Id":"2014-12-01T14:36:04.877Z"
+  },
+  "H0039701836021":{
+    "op":"feedback",
+    "at":"2014-12-01T14:36:04.904Z",
+    "Last-Event-Id":"2014-12-01T14:36:04.877Z"
+  }
+}
 ```
 
 
 ## To Do
 
 - Manage SSE IDs! (client re-synch/reconnection an get events from last SSE ID).
-- Add a queue system to store events pushed on each channel (I guess to use REDIS)
+- Store to disk (persistence) events and status!
 - Less raugh subscriber.html
 - Think about some UUID to identify devices (serialnumber/IMEI/MAC?)
-- Add some Admin endpoints (to monitor connections number / devices listening)
 - Manage PRESENCE of devices
-- Add a bit of security (token-ids for each publisher/subscriber)
+- Add a bit of security (token-ids for each publisher/subscriber devices)
 
 
 ## Release Notes
 
-### v.0.0.3  - 28 November 2014
+### v.0.0.4 - 1 December 2014
+- timestamps used as SSE IDs
 - understood how to manage Last-Event-ID (as http header param)
-- /admin/connections: a bit of monitoring
+- /admin/* for a bit of status monitoring
 
 ### v.0.0.1 - 24 November 2014
 - First release. 

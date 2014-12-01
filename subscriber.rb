@@ -4,15 +4,8 @@ require 'time'
 require 'colorize'
 require 'multi_json'
 require 'rest_client'
-require "em-eventsource"
-
-# http://dev.af83.com/2011/08/03/em-eventsource-an-eventmachine-client-for-server-sent-events.html
-# https://github.com/AF83/em-eventsource
-
-# random id
-# http://stackoverflow.com/questions/6021372/best-way-to-create-unique-token-in-rails
-# raspberrypi.stackexchange.com/questions/2086/how-do-i-get-the-serial-number
-# http://www.sitepoint.com/tour-random-ruby/
+require 'em-eventsource'
+require_relative 'lib/utilities'
 
 hostname = "#{ENV['HOSTNAME']}:4567" 
 channel = "CHANNEL_1"
@@ -23,28 +16,23 @@ channel_url = "http://#{hostname}/feed/#{channel}"
 # to feedback status (up-stream)
 feedback_url =  "http://#{hostname}/feedback/#{channel}"
 
+# SUBSCRIBER DEVICE ID. 'H' for Host client 
+device =  device_random 'H'
 
-#
-# SUBSCRIBER DEVICE ID
-# random number of 9 ciphers (a cellphone) 
-# 'H' for Host client 
-#
-device = ["H", "0039", rand(1..9), (1..8).map{rand(0..9)}].join
-
-puts "LISTEN (device: #{device}), channel: #{channel}, server: #{hostname}".yellow
+puts "SUBSCRIBER from device: #{device}, to channel: #{channel}, at server: #{hostname}".yellow
 
 
 #
 # ELABORATE EVENT
 # message event could be JSON data
 #
-def elaborate(event)
+def elaborate(event, last_event_id)
 
-   puts "RX EVT> #{event}".green
+   puts "RX EVT> id: #{last_event_id}, data: #{event}".green
  
-  # do something with event
+  # TODO: do something with event
 
-  status = "ok"
+  status = "rx ok"
 end	
 
 
@@ -56,21 +44,19 @@ EM.run do
   source = EventMachine::EventSource.new channel_url, query, headers
 
   source.message do |event|
- 
-    # elaborate receive message event and set elaboration status
-    status =  elaborate event
 
+    # get SSE last_event_id
     last_event_id = source.last_event_id
 
+    # elaborate receive message event and set elaboration status
+    status =  elaborate(event, last_event_id)
+
     # send back an HTTP POST /feedback/:channel with status info
-    #
-    # http://stackoverflow.com/questions/12161640/setting-request-headers-in-ruby
-    # http://stackoverflow.com/questions/20511661/accessing-header-params-in-restclient-api-get-call
     query = { status: status }
     headers = { device: device, last_event_id: last_event_id }
 
-    response = RestClient.post feedback_url, query, headers 
-                               
+    response = RestClient.post feedback_url, query, headers                                
+
   end
 
   source.start # Start listening
