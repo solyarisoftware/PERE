@@ -33,6 +33,11 @@ def log_params
 end
 
 
+def sse_event(id, data)
+  "id: #{id}\ndata: #{data}\n\n"
+end
+
+
 #
 # return the value of an HTTP header param 
 # return nil of param doesn't exist

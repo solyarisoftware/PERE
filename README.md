@@ -12,7 +12,7 @@ BTW, "PERE" is an acronym for "Push Events Receipt Engine" and my mother tongue 
 
 ## Push notifications with return-receipt (the problem)
 
-For some business application purposes, I need to delivery events (=messages) server-side published, to a multitude of devices, with an (optional) garantee delivery receipt (return-receipt) of each message sent.
+For some business application purposes, I need to delivery events (= messages) server-side published, to a multitude of devices, with a **garantee delivery receipt (= return-receipt)** of each message sent.
 
 - Devices: are possibly "anything": 
   - hosts clients
@@ -28,7 +28,7 @@ For some business application purposes, I need to delivery events (=messages) se
   - The server must have some *delivery-receipt* aka *return-receipt* from each client device subscribed to receive events on a channel, with a *status update* of local elaborations.
   - "Presence" of clients devices must be tarcked by server
 
-- JSON for data transport is fine.
+- JSON for payload data transport is fine.
 
 - Just HTTP as transport protocol ? 
 
@@ -51,9 +51,9 @@ Client devices reply to events notification using standard HTTP req/res (HTTP PO
 
 ```
 
-Publishers Devices   PERE server                                         Subscriber Devices
-          |               |                                                    |
-          v               v                                                    v
+Publishers Devices   PERE server                                    Subscriber Devices
+           |              |                                                    |
+           v              v                                                    v
                    .-------------.
   HTTP POST evt -> | -> queue -> |--- HTTP SSE events  --> channel 1 -> device 1 
                    |   status <- |<-- HTTP POST status <---------------
@@ -74,44 +74,44 @@ Publishers Devices   PERE server                                         Subscri
 
 
 Usual tools: 
-- Ruby language as glue.
+- Ruby language (v.2.1.5) as glue.
 - Beloved [Sinatra](https://github.com/sinatra/sinatra) microframework 
 - Fast [Thin](https://github.com/macournoyer/thin/) web server 
 - Event-driven I/O under the woods [EventMachine](https://github.com/eventmachine/eventmachine)
 
 
-### SSEserver: Sinatra API Server
+### pere.rb: the API server engine
 
-The backend is an API server that accept three main endpoints:
+The backend is a Sinatra API server engine that accept three main endpoints:
 
-- Publisher push events on a channel
-SSEserver push an event to a channel (with an HTTP POST):
+- Publisher 
+Device push events on a named channel (with an HTTP POST):
 
-```bash
+```ruby
 post "/push/:channel" do
   ... 
 end  
 ```
 
-- Subscriber and receive events from the channel
-Client device subscribe to a channel and receive events (SSE Down-stream):
+- Subscriber feed
+Client device subscribe to listen on a channel and receive related events (SSE Down-stream):
 
-```bash
+```ruby
 get "/feed/:channel", provides: 'text/event-stream' do
   ...
 end  
 ```
 
-- Subscriber reply Feedbacks
-Client previously Subscribed, reply to each event (UP-stream with HTTP POST webhooks):
+- Subscriber return receipt feedback
+Client previously subscribed, reply to each event (UP-stream with HTTP POST webhooks):
 
-```bash
+```ruby
 post "/feedback/:channel" do
   ...
 end  
 ```
 
-## Enjoy tests scripts
+## Run all
 
 Above all install all gems:
 
@@ -121,9 +121,9 @@ $ export HOSTNAME= yourhostname
 ```
 
 
-### run PERE API server!
+### run the backend server: pere.rb 
 
-On the first terminal run the server, a Sinatra engine doing the back-end job: 
+On the first terminal run the server, a Sinatra engine do the back-end job: 
 
 ```bash
 $ ruby pere.rb -o yourhostname
@@ -135,35 +135,34 @@ Listening on yourhostname:4567, CTRL+C to stop
 ```
 
 
-### run the *event publisher* test script
+### run the *event publisher* test script: publisher.rb
 
  On a terminal, the test publisher that emit / push some event every few seconds on a certain channel. An event here is a JSON containing chunk of random data as payload:
 
 ```bash
 $ ruby publisher.rb
-
-PUBLISH (device: P0039696456814), channel: CHANNEL_1, server: yourhostname:4567
-
-PUSH EVT> event: {"channel":"CHANNEL_1","device":"P0039696456814","id":1,"time":"2014-11-25T08:12:09Z","data":"jvg2dchijlkob1afuauaohtbzzhd7ayp"}
-PUSH EVT> event: {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":"2014-11-25T08:12:25Z","data":"fa8keuulgef63154oqdo8fwcbiysha6qsd414fsf5i3phbhe0lokdyymjlwxcc3zqwt1"}
+PUSH EVENTS from device: P0039299345141, to channel: CHANNEL_1, at server: yourhostname:4567
+PUSH EVT> event: {"device":"P0039299345141","time":"2014-12-02T15:45:51.626Z","id":1,"data":"s8uwedgsk5qf7jf52k"}
+PUSH EVT> event: {"device":"P0039299345141","time":"2014-12-02T15:46:04.839Z","id":2,"data":"85levx6dfxzj9a2yn1nx1"}
+PUSH EVT> event: {"device":"P0039299345141","time":"2014-12-02T15:46:22.896Z","id":3,"data":"t3ltjrdsehaweewib"}
+PUSH EVT> event: {"device":"P0039299345141","time":"2014-12-02T15:46:37.935Z","id":4,"data":"wdjij9qrjfphlhzy7"}
 ```
 
 
-### run a *host subscriber* script
+### run an *host subscriber* test script: subscriber.rb 
 
 On one or many terminal (devices), run a test client host that listen events on a certain channel, does some elaboration and feedback some status ack to server:
 
 ```bash
 $ ruby subscriber.rb
-
-LISTEN (device: H0039350488701), channel: CHANNEL_1, server: yourhostname:4567
-
-RX EVT> {"channel":"CHANNEL_1","device":"P0039696456814","id":1,"time":"2014-11-25T08:12:09Z","data":"jvg2dchijlkob1afuauaohtbzzhd7ayp"}
-RX EVT> {"channel":"CHANNEL_1","device":"P0039696456814","id":2,"time":"2014-11-25T08:12:25Z","data":"fa8keuulgef63154oqdo8fwcbiysha6qsd414fsf5i3phbhe0lokdyymjlwxcc3zqwt1"}
+SUBSCRIBER from device: H0039858702766, to channel: CHANNEL_1, at server: yourhostname:4567
+RX EVT> id: 2014-12-02T15:45:51.766Z, data: {"device":"P0039299345141","time":"2014-12-02T15:45:51.626Z","id":1,"data":"s8uwedgsk5qq4ywuf7jf52k"}
+RX EVT> id: 2014-12-02T15:46:04.861Z, data: {"device":"P0039299345141","time":"2014-12-02T15:46:04.839Z","id":2,"data":"85levx6dfxzj9a2yn1nx1"}
+RX EVT> id: 2014-12-02T15:46:22.914Z, data: {"device":"P0039299345141","time":"2014-12-02T15:46:22.896Z","id":3,"data":"t3ltjrdsehaweewib"}
 ```
 
 
-### run a *web subscriber*  
+### run a *web subscriber* on a browser 
 
 On (one or many) browser windows, open a web page that listen events events on a certain channel (using standard SSE HTML Javascript code), does some elaboration and feedback some status ack to server:
 
@@ -174,30 +173,24 @@ On (one or many) browser windows, open a web page that listen events events on a
 
 On the engine terminal you can watch what happen with stdout logs:
 
-
 ```bash
 == Sinatra/1.4.5 has taken the stage on 4567 for development with backup from Thin
 Thin web server (v1.6.3 codename Protein Powder)
 Maximum connections set to 1024
-Listening on 192.168.1.103:4567, CTRL+C to stop
-FEED REQ> device: H0039526449233, channel: CHANNEL_1, Last-Event-Id: 2014-12-01T15:01:45.025Z
-FEED REQ> device: H0039701836021, channel: CHANNEL_1, Last-Event-Id: 2014-12-01T15:01:45.025Z
-PUSH EVT> channel: CHANNEL_1, device: P0039440629675, Event-Id: 2014-12-01T15:02:07.066Z, data: {"channel":"CHANNEL_1","pub_id":179,"data":"kypcav3np07xdoq9yj91798dofm"}
-FEEDBACK> channel: CHANNEL_1, device: H0039526449233, Last-Event-Id: 2014-12-01T15:02:07.066Z, status: rx ok
-FEEDBACK> channel: CHANNEL_1, device: H0039701836021, Last-Event-Id: 2014-12-01T15:02:07.066Z, status: rx ok
-PUSH EVT> channel: CHANNEL_1, device: P0039440629675, Event-Id: 2014-12-01T15:02:25.104Z, data: {"channel":"CHANNEL_1","pub_id":180,"data":"90su3d2zs5iaen"}
-FEEDBACK> channel: CHANNEL_1, device: H0039701836021, Last-Event-Id: 2014-12-01T15:02:25.104Z, status: rx ok
-FEEDBACK> channel: CHANNEL_1, device: H0039526449233, Last-Event-Id: 2014-12-01T15:02:25.104Z, status: rx ok
-PUSH EVT> channel: CHANNEL_1, device: P0039440629675, Event-Id: 2014-12-01T15:02:35.151Z, data: {"channel":"CHANNEL_1","pub_id":181,"data":"vssis31pylxz0dx"}
-FEEDBACK> channel: CHANNEL_1, device: H0039701836021, Last-Event-Id: 2014-12-01T15:02:35.151Z, status: rx ok
-FEEDBACK> channel: CHANNEL_1, device: H0039526449233, Last-Event-Id: 2014-12-01T15:02:35.151Z, status: rx ok
+Listening on yourhostname:4567, CTRL+C to stop
+PUSH EVT> channel: CHANNEL_1, device: P0039457529090, Event-Id: 2014-12-02T15:37:42.243Z, data: {"device":"P0039457529090",", Event-Id: 2014-12-02T15:37:42.218Z","id":10,"data":"m9y72tw2nyeisgwanqu4"}
+FEEDBACK> channel: CHANNEL_1, device: H0039529367750, Last-Event-Id: 2014-12-02T15:37:42.243Z, status: rx ok
+PUSH EVT> channel: CHANNEL_1, device: P0039457529090, Event-Id: 2014-12-02T15:38:02.320Z, data: {"device":"P0039457529090",", Event-Id: 2014-12-02T15:38:02.281Z","id":11,"data":"nm7ntdod8l6y43ec135goxu4tltz"}
+FEEDBACK> channel: CHANNEL_1, device: H0039529367750, Last-Event-Id: 2014-12-02T15:38:02.320Z, status: rx ok
+PUSH EVT> channel: CHANNEL_1, device: P0039457529090, Event-Id: 2014-12-02T15:38:15.372Z, data: {"device":"P0039457529090",", Event-Id: 2014-12-02T15:38:15.345Z","id":12,"data":"y3enb9nio1othcq1i"}
+FEEDBACK> channel: CHANNEL_1, device: H0039529367750, Last-Event-Id: 2014-12-02T15:38:15.372Z, status: rx ok
 ^CStopping ...
 Stopping ...
 == Sinatra has ended his set (crowd applauds)
 
 ```
 
-### Monitor status
+### Monitor status API
 
 Some endpoints are available to monitor internal status / memory
 
@@ -229,12 +222,7 @@ $ curl yourhost:4567/admin/events/CHANNEL_1
     "id":2,
     "data":"3hxolcaxf5buax6nou9"
   },
-  {
-    "device":"P0039163746978",
-    "time":"2014-12-01T15:09:55.812Z",
-    "id":3,
-    "data":"6ovkzc0dxr4ypge9t"
-  }
+  ...
 ]
 ```
 
@@ -253,28 +241,24 @@ $ curl yourhost:4567/admin/devices/CHANNEL_1
     "at":"2014-12-01T14:36:04.910Z",
     "Last-Event-Id":"2014-12-01T14:36:04.877Z"
   },
-  "H0039701836021":{
-    "op":"feedback",
-    "at":"2014-12-01T14:36:04.904Z",
-    "Last-Event-Id":"2014-12-01T14:36:04.877Z"
-  }
+  ...
 }
 ```
 
 
 ## To Do
 
-- Manage SSE IDs! (client re-synch/reconnection an get events from last SSE ID).
-- Store to disk (persistence) events and status!
+- Store to disk (persistence) events and status (with Marshal dump or any db, e.g. Redis)
 - Less raugh subscriber.html
 - Think about some UUID to identify devices (serialnumber/IMEI/MAC?)
-- Manage PRESENCE of devices
-- Add a bit of security (token-ids for each publisher/subscriber devices)
+- Better manage devices status ("presence")
+- Add a bit of API endpoints security (token-ids)
 
 
 ## Release Notes
 
-### v.0.0.4 - 1 December 2014
+### v.0.0.5 - 2 December 2014
+- Manage SSE ID re-synch/reconnection pushing out previously undelivered / lost events).
 - timestamps used as SSE IDs
 - understood how to manage Last-Event-ID (as http header param)
 - /admin/* for a bit of status monitoring
@@ -314,17 +298,13 @@ SOFTWARE.Real-Time Web Technologies Guide
 - [Peter Ohler](https://github.com/ohler55) for [oj](https://github.com/ohler55/oj) JSON optimizer.
 - [Marc-André Cournoyer](https://github.com/macournoyer) for [Thin](https://github.com/macournoyer/thin) superfast Tiny, fast & funny HTTP server
 - [Kenichi Nakamura](https://github.com/kenichi) for [Angelo](https://github.com/kenichi/angelo)
-- [Salvatore Sanfilippo](https://github.com/antirez) I do not (yet) used [REDIS](http://redis.io/) here, but there is always a good reason to thank-you him
-
-
-## Readings about *realtime web and SSE*
-
-The book!
-- [Data Push Apps with HTML5 SSE](http://shop.oreilly.com/product/0636920030928.do) superb book (also avalialbl as ebook) by [Darren Cook](http://stackoverflow.com/users/841830/darren-cook)
+- [Darren Cook](http://stackoverflow.com/users/841830/darren-cook) for superb book (also avalialbl as ebook): [Data Push Apps with HTML5 SSE](http://shop.oreilly.com/product/0636920030928.do) 
 
 <img src="http://akamaicovers.oreilly.com/images/0636920030928/lrg.jpg" width="40%" height="40%" alt="Data Push Apps with HTML5 SSE">
 
-Online readings:
+
+## Online readings about *realtime web and SSE*
+
 - [Building Real-Time Web Applications with Server-Sent Events](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html) by [John Pignata](http://tx.pignata.com/2012/10/building-real-time-web-applications-with-server-sent-events.html)
 - [WebSockets vs. Server-Sent events/EventSource](http://stackoverflow.com/questions/5195452/websockets-vs-server-sent-events-eventsource)
 - [Stream Updates with Server-Sent Events](http://www.html5rocks.com/en/tutorials/eventsource/basics/)
@@ -332,12 +312,11 @@ Online readings:
 - [Let's Get Real (time): Server-Sent Events, WebSockets and WebRTC for the soul](http://www.slideshare.net/swanandpagnis/lets-get-real-time-serversent-events-websockets-and-webrtc-for-the-soul) by [Swanand Pagnis](https://github.com/swanandp)
 - [Server-Sent Events and Javascript](http://www.sitepoint.com/server-sent-events/) by [Tiffany B. Brown](https://twitter.com/webinista)
 - [Using server-sent events from a web application](https://developer.mozilla.org/en-US/docs/Server-sent_events/Using_server-sent_events)
-- [EventMachine](https://github.com/eventmachine/eventmachine/wiki)
 
 
 # Contacts
 
-Please feel free to write an e-mail with your comments are more than welcome. BTW, a mention/feedback to me will be very welcome and STAR the project if you feel it useful!
+Please feel free to write an e-mail with your comments are more than welcome. BTW, a mention/feedback to me will be very welcome and **STAR the project if you feel it useful**!
 
 twitter: [@solyarisoftware](http://www.twitter.com/solyarisoftware)
 e-mail: [giorgio.robino@gmail.com](mailto:giorgio.robino@gmail.com)
