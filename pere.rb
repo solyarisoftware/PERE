@@ -3,7 +3,7 @@
 require 'colorize'
 require 'multi_json'
 require 'sinatra'
-require_relative 'lib/utilities'
+require_relative 'lib/helpers'
 
 # Sinatra confgurations
 set debug: false
@@ -24,15 +24,15 @@ set server: 'thin'
 set connections:  Hash.new {|h, k| h[k] = [] }
 
 
-# Channel sse_id Storage
+# Channel last_event_id Storage
 #
 # for each channel, Last-Event-Id (could be a timestamp)
 #
-#   sse_id[:channel_1] = timestamp
+#   last_event_id[:channel_1] = timestamp
 #   ...
-#   sse_id[:channel_N] = timestamp
+#   last_event_id[:channel_N] = timestamp
 #
-set sse_id: Hash.new
+set last_event_id: Hash.new
 
 
 # Events Memory Storage 
@@ -78,7 +78,7 @@ post "/push/:channel" do
   data = request.body.read
 
   # Set SSE ID data packet as timestamp
-  id = settings.sse_id[channel] = time_now
+  id = settings.last_event_id[channel] = time_now
 
   # store event
   settings.events[channel][id] = data
@@ -125,12 +125,15 @@ get "/feed/:channel", provides: 'text/event-stream' do
     settings.connections[channel] << out
 
     out.callback do 
-      puts 'Client #{out.inspect} disconnected';
+      puts 'Client disconnected';
       settings.connections[channel].delete(out)
     end
 
     # 
     # push out UNDELIVERED events to SSE open connection
+    # Handling reconnections. When EventSource client reconnects, 
+    # we need to continue sending the data 
+    # from the point the connection was lost
     #
     if settings.connections[channel].include?(out)
 
@@ -245,3 +248,9 @@ end
 error do
   MultiJson.dump({ message: 'Sorry there was a nasty error - ' + env['sinatra.error'].name }, pretty: true)
 end
+
+=begin
+at_exit do 
+  puts "au-revoir! by @solyarisoftware"
+end
+=end

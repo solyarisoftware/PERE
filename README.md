@@ -1,21 +1,21 @@
 PERE
 ====
 
-PUSH EVENTS with RETURN-RECEIPT Engine: a Ruby-Sinatra SSE Pub/Sub demo framework.
+Push Events with Return-receipt Engine: a Ruby-Sinatra SSE Pub/Sub demo framework
 
 <img src="https://github.com/solyaris/PERE/blob/master/public/pere-logo.png" alt="PERE logo">
 
-Here a simple *proof of concept*/demo code, to show how to push events using flat HTTP SSE (down-stream) to clients devices with *delivery receipts* (up-stream feedbacks).
+Just a simple *proof of concept*/demo code, to show how to push events using flat HTTP SSE (down-stream) to clients devices with *delivery receipts* (up-stream feedbacks).
 
-BTW, "PERE" is an acronym for "Push Events Receipt Engine" and my mother tongue language (Italian), "pere" means "pears" (the fruit) :-) 
+BTW, *PERE* is an acronym for *Push Events Receipt Engine* and my mother tongue language (Italian), *pere* means *pears* (the fruit!) :-) 
 
 
 ## Push notifications with return-receipt (the problem)
 
-For some business application purposes, I need to delivery events (= messages) server-side published, to a multitude of devices, with a **garantee delivery receipt (= return-receipt)** of each message sent.
+For some business application purposes (my startup projects), I need to delivery events (= messages) server-side published, to a multitude of devices, with a **garantee delivery receipt (= return-receipt)** of each message sent.
 
 - Devices: are possibly "anything": 
-  - hosts clients
+  - hosts clients (running on PCs, microcontrollers, let say any IOT/M2M client "terminals")
   - web browsers on PCs
   - mobile handset (via website or native app)
 
@@ -75,17 +75,17 @@ Publishers Devices   PERE server                                    Subscriber D
 
 Usual tools: 
 - Ruby language (v.2.1.5) as glue.
-- Beloved [Sinatra](https://github.com/sinatra/sinatra) microframework 
+- Beloved [Sinatra](https://github.com/sinatra/sinatra) as API server microframework 
 - Fast [Thin](https://github.com/macournoyer/thin/) web server 
 - Event-driven I/O under the woods [EventMachine](https://github.com/eventmachine/eventmachine)
 
 
-### pere.rb: the API server engine
+### pere.rb: APIs endpoints for publishers/subscribers
 
 The backend is a Sinatra API server engine that accept three main endpoints:
 
 - Publisher 
-Device push events on a named channel (with an HTTP POST):
+  Device push events on a named channel (with an HTTP POST):
 
 ```ruby
 post "/push/:channel" do
@@ -94,7 +94,7 @@ end
 ```
 
 - Subscriber feed
-Client device subscribe to listen on a channel and receive related events (SSE Down-stream):
+  Client device subscribe to listen on a channel and receive related events (SSE Down-stream):
 
 ```ruby
 get "/feed/:channel", provides: 'text/event-stream' do
@@ -103,7 +103,7 @@ end
 ```
 
 - Subscriber return receipt feedback
-Client previously subscribed, reply to each event (UP-stream with HTTP POST webhooks):
+  Client previously subscribed, reply to each event (UP-stream with HTTP POST webhooks):
 
 ```ruby
 post "/feedback/:channel" do
@@ -117,7 +117,6 @@ Above all install all gems:
 
 ```bash
 $ bundle install
-$ export HOSTNAME= yourhostname
 ```
 
 
@@ -126,7 +125,7 @@ $ export HOSTNAME= yourhostname
 On the first terminal run the server, a Sinatra engine do the back-end job: 
 
 ```bash
-$ ruby pere.rb -o yourhostname
+$ ruby pere.rb -o yourhostname [-p yourportnumber]
 
 == Sinatra/1.4.5 has taken the stage on 4567 for development with backup from Thin
 Thin web server (v1.6.3 codename Protein Powder)
@@ -140,7 +139,7 @@ Listening on yourhostname:4567, CTRL+C to stop
  On a terminal, the test publisher that emit / push some event every few seconds on a certain channel. An event here is a JSON containing chunk of random data as payload:
 
 ```bash
-$ ruby publisher.rb
+$ ruby publisher.rb yourhostname:4567 CHANNEL_1
 PUSH EVENTS from device: P0039299345141, to channel: CHANNEL_1, at server: yourhostname:4567
 PUSH EVT> event: {"device":"P0039299345141","time":"2014-12-02T15:45:51.626Z","id":1,"data":"s8uwedgsk5qf7jf52k"}
 PUSH EVT> event: {"device":"P0039299345141","time":"2014-12-02T15:46:04.839Z","id":2,"data":"85levx6dfxzj9a2yn1nx1"}
@@ -154,7 +153,7 @@ PUSH EVT> event: {"device":"P0039299345141","time":"2014-12-02T15:46:37.935Z","i
 On one or many terminal (devices), run a test client host that listen events on a certain channel, does some elaboration and feedback some status ack to server:
 
 ```bash
-$ ruby subscriber.rb
+$ ruby subscriber.rb yourhostname:4567 CHANNEL_1
 SUBSCRIBER from device: H0039858702766, to channel: CHANNEL_1, at server: yourhostname:4567
 RX EVT> id: 2014-12-02T15:45:51.766Z, data: {"device":"P0039299345141","time":"2014-12-02T15:45:51.626Z","id":1,"data":"s8uwedgsk5qq4ywuf7jf52k"}
 RX EVT> id: 2014-12-02T15:46:04.861Z, data: {"device":"P0039299345141","time":"2014-12-02T15:46:04.839Z","id":2,"data":"85levx6dfxzj9a2yn1nx1"}
@@ -169,7 +168,7 @@ On (one or many) browser windows, open a web page that listen events events on a
 <img src="https://github.com/solyaris/PERE/blob/master/public/screenshot.jpg" alt="server screenshot">
 
 
-### PERE logs
+### Server logs
 
 On the engine terminal you can watch what happen with stdout logs:
 
@@ -190,13 +189,13 @@ Stopping ...
 
 ```
 
-### Monitor status API
+### Administration APIs
 
 Some endpoints are available to monitor internal status / memory
 
 To know how many open connections there are for each channel:
 
-```
+```bash
 $ curl yourhost:4567/admin/connections
 {
   "CHANNEL_1":4,
@@ -207,7 +206,7 @@ $ curl yourhost:4567/admin/connections
 
 Events list for each channel:
 
-```
+```bash
 $ curl yourhost:4567/admin/events/CHANNEL_1
 [
   {
@@ -228,7 +227,7 @@ $ curl yourhost:4567/admin/events/CHANNEL_1
 
 Devices (subscribers) list (status & presence) on a channel:
 
-```
+```bash
 $ curl yourhost:4567/admin/devices/CHANNEL_1
 {
   "H0039258085863":{
@@ -245,19 +244,35 @@ $ curl yourhost:4567/admin/devices/CHANNEL_1
 }
 ```
 
+## Notes
 
-## To Do
+- Device-ID / User-ID
+  Are partially a synonimous of "Client Identifier".
 
-- Store to disk (persistence) events and status (with Marshal dump or any db, e.g. Redis)
+- SSE Events payload  
+  It could be anything, remembering SSE is a text-mode protcol.
+  I chose to use JSON as dafault. any explication probably useless.
+  Anyway JSON is not manadatory: any text message could be used as data payload. 
+
+- SSE Protocol Implementation
+  I used just "id" and "data" attributes. 
+  
+
+## To Do (in priority order)
+- Manage some pruning of data structures in memory, especially avoiding event "queues" overflow RAM. Some ways: delete old events (say delete events older than Time-now - some hours ). Another strategy could be to delete events as soon are read by all "active" subscribers. 
+- Store to disk (persistence) events, devices, status (with Marshal dump or any db, e.g. Redis). Think about a cyclic write to disk. Hey Giorgio! why don't you want to use old good Postgresql? ;-)
+- Better manage SSE protocol, especially reconnection issues/optimizations, server-side: with "retry" directive and possible application-level heartbeat/keepalive (send a comment char (":") every N seconds) to clients. Client-side: better understand the reconnection timeouts configuration (important for mobile handsets battery save...).
 - Less raugh subscriber.html
-- Think about some UUID to identify devices (serialnumber/IMEI/MAC?)
+- Manage Devices/Users registration: enabling services just for some publishers/subscribers.
+- Add a bit of API endpoints security (auth-token-ids) for both devices' endpoints and admin endpoints.
 - Better manage devices status ("presence")
-- Add a bit of API endpoints security (token-ids)
+- Think about some UUID to identify devices (serialnumber/IMEI/MAC?)
 
 
 ## Release Notes
 
-### v.0.0.5 - 2 December 2014
+### v.0.0.6 - 3 December 2014
+- a bit better command line test scripts: publisher.rb, subscriber.rb
 - Manage SSE ID re-synch/reconnection pushing out previously undelivered / lost events).
 - timestamps used as SSE IDs
 - understood how to manage Last-Event-ID (as http header param)

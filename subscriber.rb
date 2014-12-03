@@ -5,10 +5,21 @@ require 'colorize'
 require 'multi_json'
 require 'rest_client'
 require 'em-eventsource'
-require_relative 'lib/utilities'
+require_relative 'lib/helpers'
 
-hostname = "#{ENV['HOSTNAME']}:4567" 
-channel = "CHANNEL_1"
+
+if ARGV[0].nil? || ARGV[1].nil?
+  puts "   goal: test a client device subscriber to receive SSE events from a channel" 
+  puts "  usage: #{$0} <PERE_server_hostname:port> <channel_name> [<device_id>]"
+  puts "example: ruby #{$0} yourhostname:4567 DEFAULT_CHANNEL"
+  exit
+end
+
+hostname, channel, device = ARGV
+
+#channel = "DEFAULT_CHANNEL"
+#hostname = "#{ENV['HOSTNAME']}:4567" 
+
 
 # to subscribe (a down-stream)
 channel_url = "http://#{hostname}/feed/#{channel}"    
@@ -17,7 +28,7 @@ channel_url = "http://#{hostname}/feed/#{channel}"
 feedback_url =  "http://#{hostname}/feedback/#{channel}"
 
 # SUBSCRIBER DEVICE ID. 'H' for Host client 
-device =  device_random 'H'
+device ||=  device_random 'H'
 
 puts "SUBSCRIBER from device: #{device}, to channel: #{channel}, at server: #{hostname}".yellow
 

@@ -24,6 +24,11 @@ def data_random(min, max)
 end
 
 
+#
+# some helpers for Sinatra server
+#
+
+
 # for debug
 def log_params
   puts "query params:"
@@ -33,8 +38,13 @@ def log_params
 end
 
 
+#
+# Server-Sent Events (SSE) text message format
+# here just two attributes: 'id' and 'data'
+# no 'event', etc. 
+#
 def sse_event(id, data)
-  "id: #{id}\ndata: #{data}\n\n"
+  "id:#{id}\ndata:#{data}\n\n"
 end
 
 
