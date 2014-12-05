@@ -40,7 +40,7 @@ def push_event(hostname, channel, json_msg, device)
   rescue => e
     # unable to connect to server ? retry in few seconds
     puts "PUSH FAILED. event: #{json_msg} reason: #{e.message}".red
-    sleep (1..10)
+    sleep ( rand (1.0..10.0) )
     retry
   end
 
