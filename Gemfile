@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+gem 'colorizer'
+
 # for publisher
 gem 'oj'
 gem 'multi_json'
